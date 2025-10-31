@@ -1,15 +1,19 @@
 import { Box, Button, Typography } from '@mui/material';
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
-import {
-  ErrorComponent,
-  type ErrorComponentProps,
-  useRouter,
-} from '@tanstack/react-router';
 import { useEffect } from 'react';
+import {
+  isRouteErrorResponse,
+  useNavigate,
+  useRouteError,
+} from 'react-router-dom';
 
-export default function RouteErrorComponent({ error }: ErrorComponentProps) {
-  const router = useRouter();
+export default function RouteErrorComponent() {
+  // useRouteError() captures the error thrown by a loader, action, or component
+  const error = useRouteError();
+  const navigate = useNavigate();
   const queryErrorResetBoundary = useQueryErrorResetBoundary();
+
+  console.error('Route Error:', error);
 
   useEffect(() => {
     // Reset the query error boundary when this component mounts
@@ -17,24 +21,46 @@ export default function RouteErrorComponent({ error }: ErrorComponentProps) {
   }, [queryErrorResetBoundary]);
 
   // Check if it's a network/API error
-  const errorAny = error as any;
-  const isNetworkError =
-    error?.message?.includes('Network') ||
-    error?.message?.includes('fetch') ||
-    errorAny?.response?.status >= 500 ||
-    errorAny?.code === 'ECONNREFUSED';
+  let isNetworkError = false;
+  let title = 'Something Went Wrong';
+  let message = 'An unexpected error occurred. Please try again.';
 
-  const title = isNetworkError
-    ? 'Unable to Connect to Server'
-    : 'Something Went Wrong';
+  if (isRouteErrorResponse(error)) {
+    // This is an error from a loader/action response (e.g., 404, 503)
+    if (error.status >= 500) {
+      isNetworkError = true;
+    }
+    title = isNetworkError ? 'Unable to Connect to Server' : error.statusText;
+    message =
+      (error.data as any)?.message ||
+      'Please check your connection and try again.';
+  } else if (error instanceof Error) {
+    // This is a standard JavaScript error
+    if (
+      error.message.includes('Network') ||
+      error.message.includes('fetch') ||
+      (error as any).code === 'ECONNREFUSED'
+    ) {
+      isNetworkError = true;
+    }
 
-  const message = isNetworkError
-    ? 'Please check that your Eight Sleep device is powered on and connected to your network.'
-    : error?.message || 'An unexpected error occurred. Please try again.';
+    title = isNetworkError
+      ? 'Unable to Connect to Server'
+      : 'An Error Occurred';
+    message = isNetworkError
+      ? 'Please check that your Eight Sleep device is powered on and connected to your network.'
+      : error.message;
+  }
 
   // For development, show the full error
   if (import.meta.env.DEV) {
-    return <ErrorComponent error={error} />;
+    return (
+      <Box sx={{ p: 4, color: 'white' }}>
+        <h1>Route Error</h1>
+        <pre>{JSON.stringify(error, null, 2)}</pre>
+        <Button onClick={() => navigate(0)}>Try Again</Button>
+      </Box>
+    );
   }
 
   // Production-friendly error display
@@ -63,8 +89,8 @@ export default function RouteErrorComponent({ error }: ErrorComponentProps) {
       </Typography>
       <Button
         onClick={() => {
-          // Invalidate the route to reload the loader and reset error boundaries
-          router.invalidate();
+          // navigate(0) reloads the current route, re-running the loader
+          navigate(0);
         }}
         variant="contained"
         size="large"

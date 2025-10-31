@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from '@tanstack/react-router';
+import { useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import axiosInstance from './api';
 

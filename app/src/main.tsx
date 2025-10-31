@@ -4,14 +4,21 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AppStoreProvider } from '@state/appStore.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
-import RouteErrorComponent from './components/RouteErrorComponent.tsx';
+import ErrorBoundary from '@/components/ErrorBoundary.tsx';
 
-// Import the generated route tree
-import { routeTree } from './routeTree.gen';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { createRoot } from 'react-dom/client';
+
+import ControlTempPage from './pages/ControlTempPage/ControlTempPage';
+import SettingsPage from './pages/SettingsPage/SettingsPage';
+import Layout from './components/Layout';
+import SchedulePage from './pages/SchedulePage/ScheduleIndexPage.tsx';
+import SleepPage from './pages/DataPage/SleepPage/SleepPage.tsx';
+import DataPage from './pages/DataPage/DataPage.tsx';
+import VitalsPage from './pages/DataPage/VitalsPage/VitalsPage.tsx';
+import LogsPage from './pages/DataPage/LogsPage/LogsPage.tsx';
+import WaterLevelPage from "@/pages/WaterLevelPage/WaterLevelPage.tsx";
 
 const darkTheme = createTheme({
   palette: {
@@ -125,51 +132,52 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create a new router instance
-const router = createRouter({
-  routeTree,
-  context: {
-    queryClient,
-  },
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-  defaultStructuralSharing: true,
-  defaultPreloadStaleTime: 0,
-  defaultErrorComponent: RouteErrorComponent,
-});
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={darkTheme}>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <AppStoreProvider>
+            <CssBaseline />
+            <GlobalStyles
+              styles={{
+                'html, body': {
+                  overscrollBehavior: 'none', // Prevent rubber-banding
+                },
+              }}
+            />
+            <BrowserRouter basename="/">
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<SettingsPage />} />
+                        <Route path="temperature" element={<ControlTempPage />} />
+                        <Route path="left" element={<ControlTempPage />} />
+                        <Route path="right" element={<ControlTempPage />} />
 
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
-}
+                        <Route path="data" element={<DataPage />}>
+                            <Route path="sleep" element={<SleepPage />} />
+                            <Route path="logs" element={<LogsPage />} />
+                            <Route path="vitals" element={<VitalsPage />} />
+                        </Route>
 
-// Render the app
-const rootElement = document.getElementById('app');
-if (rootElement && !rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={darkTheme}>
-            <LocalizationProvider dateAdapter={AdapterMoment}>
-              <AppStoreProvider>
-                <CssBaseline />
-                <GlobalStyles
-                  styles={{
-                    'html, body': {
-                      overscrollBehavior: 'none', // Prevent rubber-banding
-                    },
-                  }}
-                />
-                <RouterProvider router={router} />
-              </AppStoreProvider>
-            </LocalizationProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </StrictMode>,
+                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="schedules" element={<SchedulePage />} />
+                        <Route path="water-level" element={<WaterLevelPage />} />
+                    </Route>
+                </Routes>
+
+            </BrowserRouter>
+          </AppStoreProvider>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
-}
+};
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </StrictMode>,
+);

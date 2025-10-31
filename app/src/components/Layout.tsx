@@ -1,7 +1,7 @@
+import { Outlet } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import { Outlet } from '@tanstack/react-router';
 import Navbar from './Navbar';
-import ErrorDisplay from './shared/ErrorDisplay';
+import ErrorDisplay from '../pages/shared/ErrorDisplay';
 
 export default function Layout() {
   return (

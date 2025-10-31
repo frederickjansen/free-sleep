@@ -100,7 +100,7 @@ function createScales({
   const allShiftedHours: number[] = [];
   Array.isArray(data) &&
     data.forEach((rec) => {
-      rec.present_intervals.forEach(([startStr, endStr]) => {
+      rec.present_intervals.forEach(([startStr, endStr]: [string, string]) => {
         const startHour = dateToHourOfDay(startStr);
         const endHour = dateToHourOfDay(endStr);
 
@@ -232,55 +232,57 @@ function plotSleepRecords({
 
       if (!Array.isArray(sleepRecord.present_intervals)) return;
 
-      sleepRecord.present_intervals.forEach(([startStr, endStr], i) => {
-        if (startStr < sleepRecord.entered_bed_at) {
-          if (endStr > sleepRecord.entered_bed_at) {
-            startStr = sleepRecord.entered_bed_at;
-          } else {
-            return;
+      sleepRecord.present_intervals.forEach(
+        ([startStr, endStr]: [string, string], i: number) => {
+          if (startStr < sleepRecord.entered_bed_at) {
+            if (endStr > sleepRecord.entered_bed_at) {
+              startStr = sleepRecord.entered_bed_at;
+            } else {
+              return;
+            }
           }
-        }
 
-        if (endStr > sleepRecord.left_bed_at) {
-          if (startStr < sleepRecord.left_bed_at) {
-            endStr = sleepRecord.left_bed_at;
-          } else {
-            return;
+          if (endStr > sleepRecord.left_bed_at) {
+            if (startStr < sleepRecord.left_bed_at) {
+              endStr = sleepRecord.left_bed_at;
+            } else {
+              return;
+            }
           }
-        }
 
-        // Shift hours for each interval
-        const s = shiftHour(dateToHourOfDay(startStr));
-        const e = shiftHour(dateToHourOfDay(endStr));
+          // Shift hours for each interval
+          const s = shiftHour(dateToHourOfDay(startStr));
+          const e = shiftHour(dateToHourOfDay(endStr));
 
-        const y1 = yScale(s);
-        const y2 = yScale(e);
+          const y1 = yScale(s);
+          const y2 = yScale(e);
 
-        gDay
-          .append('rect')
-          .attr('x', rectX)
-          .attr('y', Math.min(y1, y2)) // in case reversed
-          .attr('width', rectWidth)
-          .attr('height', Math.abs(y2 - y1)) // in case reversed
-          .attr(
-            'fill',
-            isSelected ? theme.palette.grey[100] : theme.palette.grey[900],
-          )
-          .attr('rx', 2)
-          .attr('class', 'bar')
-          .attr('data-id', `${sleepRecord.entered_bed_at}-${i}`)
-          .on('click', () => setSelectedSleepRecord(sleepRecord));
-        if (isSelected) {
           gDay
-            .append('text')
-            .attr('x', rectX + rectWidth / 2)
-            .attr('y', yScale.range()[1] + 40) // Placing arrow just below the X-axis
-            .attr('text-anchor', 'middle')
-            .attr('fill', theme.palette.grey[100])
-            .attr('font-size', '16px')
-            .text('▲'); // Unicode up arrow
-        }
-      });
+            .append('rect')
+            .attr('x', rectX)
+            .attr('y', Math.min(y1, y2)) // in case reversed
+            .attr('width', rectWidth)
+            .attr('height', Math.abs(y2 - y1)) // in case reversed
+            .attr(
+              'fill',
+              isSelected ? theme.palette.grey[100] : theme.palette.grey[900],
+            )
+            .attr('rx', 2)
+            .attr('class', 'bar')
+            .attr('data-id', `${sleepRecord.entered_bed_at}-${i}`)
+            .on('click', () => setSelectedSleepRecord(sleepRecord));
+          if (isSelected) {
+            gDay
+              .append('text')
+              .attr('x', rectX + rectWidth / 2)
+              .attr('y', yScale.range()[1] + 40) // Placing arrow just below the X-axis
+              .attr('text-anchor', 'middle')
+              .attr('fill', theme.palette.grey[100])
+              .attr('font-size', '16px')
+              .text('▲'); // Unicode up arrow
+          }
+        },
+      );
     });
 }
 

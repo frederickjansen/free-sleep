@@ -9,7 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useAppStore } from '@state/appStore.tsx';
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
 import { PAGES } from './pages';
 
@@ -43,7 +43,7 @@ export default function Navbar() {
 
   // Handle navigation for both desktop and mobile
   const handleNavigation = (route: string) => {
-    navigate({ to: route });
+    navigate(route);
   };
 
   const handleMobileNavChange = (

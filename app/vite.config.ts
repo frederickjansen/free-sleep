@@ -1,12 +1,12 @@
 import { resolve } from 'node:path';
-import { tanstackRouter } from '@tanstack/router-plugin/vite';
-import viteReact from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   return {
-    plugins: [tanstackRouter({ autoCodeSplitting: false }), viteReact()],
+    plugins: [react(), tsconfigPaths()],
     server: {
       host: '0.0.0.0', // This makes the server accessible to other devices on the network
       port: 3000,
