@@ -4,7 +4,7 @@ import {
   useSetBasePreset,
   useStopBase,
 } from '@api/baseControl';
-import BedVisualization from '@/pages/BedVisualization';
+import BedVisualization from '@/components/BedVisualization';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material';

@@ -10,7 +10,7 @@ export function isScheduleCurrentlyRunning(
   schedule: DailySchedule | undefined,
   timezone: string | null,
 ): boolean {
-  if (!schedule || !schedule.power.enabled) {
+  if (!schedule?.power.enabled) {
     return false;
   }
 
@@ -37,7 +37,7 @@ export function getTimeUntilScheduleStarts(
   schedule: DailySchedule | undefined,
   timezone: string | null,
 ): ScheduleStartInfo | null {
-  if (!schedule || !schedule.power.enabled) {
+  if (!schedule?.power.enabled) {
     return null;
   }
 

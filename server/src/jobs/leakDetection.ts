@@ -2,7 +2,7 @@ import {
   getRecentWaterLevelReadings,
   storeLeakAlert,
   type WaterLevelReading,
-  type LeakAlert
+  type LeakAlert,
 } from '../db/waterLevelReadings.js';
 import logger from '../logger.js';
 
@@ -14,8 +14,8 @@ interface LeakDetectionConfig {
   minAnalysisWindow: number;
 
   // Thresholds for different types of leaks (change per hour in raw units)
-  slowLeakThreshold: number;     // e.g., -0.005 per hour
-  fastLeakThreshold: number;     // e.g., -0.02 per hour
+  slowLeakThreshold: number; // e.g., -0.005 per hour
+  fastLeakThreshold: number; // e.g., -0.02 per hour
   criticalLeakThreshold: number; // e.g., -0.05 per hour
 
   // Minimum number of readings required for analysis
@@ -29,13 +29,13 @@ interface LeakDetectionConfig {
 }
 
 const DEFAULT_CONFIG: LeakDetectionConfig = {
-  minAnalysisWindow: 2,           // Analyze last 2 hours minimum
-  slowLeakThreshold: -0.008,      // Small, gradual leak (adjusted for 0.29 unit range)
-  fastLeakThreshold: -0.015,      // Noticeable leak (adjusted for sensor sensitivity)
-  criticalLeakThreshold: -0.030,  // Major leak requiring immediate attention
-  minReadings: 3,                 // Need at least 3 readings (30min intervals = 1.5hrs minimum)
+  minAnalysisWindow: 2, // Analyze last 2 hours minimum
+  slowLeakThreshold: -0.008, // Small, gradual leak (adjusted for 0.29 unit range)
+  fastLeakThreshold: -0.015, // Noticeable leak (adjusted for sensor sensitivity)
+  criticalLeakThreshold: -0.03, // Major leak requiring immediate attention
+  minReadings: 3, // Need at least 3 readings (30min intervals = 1.5hrs minimum)
   ignorePrimingPeriod: true,
-  primingCooldownHours: 2,        // Wait 2 hours after priming (Pod 4 specific)
+  primingCooldownHours: 2, // Wait 2 hours after priming (Pod 4 specific)
 };
 
 /**
@@ -52,7 +52,7 @@ function analyzeTrend(readings: WaterLevelReading[]): {
 
   // Filter out readings during priming if configured
   const filteredReadings = DEFAULT_CONFIG.ignorePrimingPeriod
-    ? readings.filter(r => !r.isPriming)
+    ? readings.filter((r) => !r.isPriming)
     : readings;
 
   if (filteredReadings.length < 2) {
@@ -60,15 +60,19 @@ function analyzeTrend(readings: WaterLevelReading[]): {
   }
 
   // Sort by timestamp
-  const sortedReadings = [...filteredReadings].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedReadings = [...filteredReadings].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   // Calculate linear regression to get rate of change
   const n = sortedReadings.length;
   const firstTime = sortedReadings[0].timestamp;
 
   // Convert timestamps to hours from start
-  const timePoints = sortedReadings.map(r => (r.timestamp - firstTime) / 3600);
-  const levelPoints = sortedReadings.map(r => r.rawLevel);
+  const timePoints = sortedReadings.map(
+    (r) => (r.timestamp - firstTime) / 3600,
+  );
+  const levelPoints = sortedReadings.map((r) => r.rawLevel);
 
   // Linear regression: y = mx + b, we want m (slope)
   const sumX = timePoints.reduce((sum, x) => sum + x, 0);
@@ -82,9 +86,16 @@ function analyzeTrend(readings: WaterLevelReading[]): {
   const meanX = sumX / n;
   const meanY = sumY / n;
 
-  const numerator = timePoints.reduce((sum, x, i) => sum + (x - meanX) * (levelPoints[i] - meanY), 0);
-  const denomX = Math.sqrt(timePoints.reduce((sum, x) => sum + (x - meanX) ** 2, 0));
-  const denomY = Math.sqrt(levelPoints.reduce((sum, y) => sum + (y - meanY) ** 2, 0));
+  const numerator = timePoints.reduce(
+    (sum, x, i) => sum + (x - meanX) * (levelPoints[i] - meanY),
+    0,
+  );
+  const denomX = Math.sqrt(
+    timePoints.reduce((sum, x) => sum + (x - meanX) ** 2, 0),
+  );
+  const denomY = Math.sqrt(
+    levelPoints.reduce((sum, y) => sum + (y - meanY) ** 2, 0),
+  );
 
   const correlation = Math.abs(numerator / (denomX * denomY));
 
@@ -128,7 +139,7 @@ function detectSensorAnomalies(readings: WaterLevelReading[]): boolean {
 
   // Check for sudden large jumps in consecutive readings
   for (let i = 1; i < readings.length; i++) {
-    const diff = Math.abs(readings[i].rawLevel - readings[i-1].rawLevel);
+    const diff = Math.abs(readings[i].rawLevel - readings[i - 1].rawLevel);
 
     // Flag if there's a sudden jump of more than 0.05 units (adjusted for capwater sensor range ~0.29)
     if (diff > 0.05) {
@@ -137,9 +148,10 @@ function detectSensorAnomalies(readings: WaterLevelReading[]): boolean {
   }
 
   // Check for excessive variance (adjusted for capwater sensor behavior)
-  const levels = readings.map(r => r.rawLevel);
+  const levels = readings.map((r) => r.rawLevel);
   const mean = levels.reduce((sum, level) => sum + level, 0) / levels.length;
-  const variance = levels.reduce((sum, level) => sum + (level - mean) ** 2, 0) / levels.length;
+  const variance =
+    levels.reduce((sum, level) => sum + (level - mean) ** 2, 0) / levels.length;
   const stdDev = Math.sqrt(variance);
 
   // Flag if standard deviation is unusually high (> 0.02 for capwater sensors)
@@ -177,7 +189,9 @@ export async function detectLeaks(): Promise<void> {
     const readings = await getRecentWaterLevelReadings(24); // Last 24 hours
 
     if (readings.length < DEFAULT_CONFIG.minReadings) {
-      logger.debug(`Insufficient readings for leak detection: ${readings.length} < ${DEFAULT_CONFIG.minReadings}`);
+      logger.debug(
+        `Insufficient readings for leak detection: ${readings.length} < ${DEFAULT_CONFIG.minReadings}`,
+      );
       return;
     }
 
@@ -196,7 +210,9 @@ export async function detectLeaks(): Promise<void> {
         severity: 'medium',
         rawLevelStart: readings[0].rawLevel,
         rawLevelEnd: readings[readings.length - 1].rawLevel,
-        hoursTracked: (readings[readings.length - 1].timestamp - readings[0].timestamp) / 3600,
+        hoursTracked:
+          (readings[readings.length - 1].timestamp - readings[0].timestamp) /
+          3600,
         rateOfChange: 0,
       };
 
@@ -211,15 +227,18 @@ export async function detectLeaks(): Promise<void> {
     for (const windowHours of timeWindows) {
       if (windowHours < DEFAULT_CONFIG.minAnalysisWindow) continue;
 
-      const cutoffTime = Math.floor(Date.now() / 1000) - (windowHours * 3600);
-      const windowReadings = readings.filter(r => r.timestamp >= cutoffTime);
+      const cutoffTime = Math.floor(Date.now() / 1000) - windowHours * 3600;
+      const windowReadings = readings.filter((r) => r.timestamp >= cutoffTime);
 
       if (windowReadings.length < DEFAULT_CONFIG.minReadings) continue;
 
       const trend = analyzeTrend(windowReadings);
 
       // Only trigger alerts for trends with good confidence and significant change
-      if (trend.confidence > 0.7 && trend.rateOfChange < DEFAULT_CONFIG.slowLeakThreshold) {
+      if (
+        trend.confidence > 0.7 &&
+        trend.rateOfChange < DEFAULT_CONFIG.slowLeakThreshold
+      ) {
         const { alertType, severity } = getLeakSeverity(trend.rateOfChange);
 
         // Don't create duplicate low-severity alerts
@@ -239,7 +258,7 @@ export async function detectLeaks(): Promise<void> {
 
         logger.warn(
           `Leak detected: ${alertType} (${severity}) over ${trend.hoursTracked.toFixed(1)} hours. ` +
-          `Rate: ${trend.rateOfChange.toFixed(4)} units/hour, Confidence: ${(trend.confidence * 100).toFixed(1)}%`
+            `Rate: ${trend.rateOfChange.toFixed(4)} units/hour, Confidence: ${(trend.confidence * 100).toFixed(1)}%`,
         );
 
         // Only alert for the first significant detection to avoid spam
@@ -249,7 +268,9 @@ export async function detectLeaks(): Promise<void> {
 
     logger.debug('Leak detection analysis completed');
   } catch (error) {
-    logger.error(`Error in leak detection: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Error in leak detection: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -271,13 +292,17 @@ export async function getLeakDetectionStatus(): Promise<{
     const trend = analyzeTrend(readings);
 
     return {
-      isActive: readings.length >= DEFAULT_CONFIG.minReadings && !isInPrimingCooldown(readings),
+      isActive:
+        readings.length >= DEFAULT_CONFIG.minReadings &&
+        !isInPrimingCooldown(readings),
       lastAnalysis: new Date().toISOString(),
       recentTrend: trend,
       readingsCount: readings.length,
     };
   } catch (error) {
-    logger.error(`Error getting leak detection status: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Error getting leak detection status: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return {
       isActive: false,
       lastAnalysis: new Date().toISOString(),

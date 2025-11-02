@@ -56,7 +56,7 @@ class Config {
     this.dacSockPath = this.detectSockPath();
     this.dbFolder = process.env.DATA_FOLDER;
     this.lowDbFolder = `${this.dbFolder}lowdb/`;
-    
+
     // Ensure required directories exist
     this.ensureDirectoriesExist();
   }

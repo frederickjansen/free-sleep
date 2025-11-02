@@ -2,11 +2,11 @@
 import { randomUUID } from 'node:crypto';
 import logger from '../logger.js';
 import type {
-    DailySchedule,
-    DayOfWeek,
-    ScheduleEntity,
-    SideSchedule,
-    SideScheduleV2,
+  DailySchedule,
+  DayOfWeek,
+  ScheduleEntity,
+  SideSchedule,
+  SideScheduleV2,
 } from './schedulesSchema.js';
 
 // Normalize schedule for comparison (from scheduleGrouping.ts logic)
@@ -76,7 +76,10 @@ export function migrateToV2(oldSide: SideSchedule): SideScheduleV2 {
   logger.info('Migrating side schedule to V2 format...');
 
   const schedules: Record<string, ScheduleEntity> = {};
-  const assignments: Record<DayOfWeek, string> = {} as Record<DayOfWeek, string>;
+  const assignments: Record<DayOfWeek, string> = {} as Record<
+    DayOfWeek,
+    string
+  >;
   const seenSchedules = new Map<string, string>(); // normalized -> scheduleId
 
   const days: (keyof SideSchedule)[] = [

@@ -87,7 +87,7 @@ function calculatePercentage(
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     const data = payload[0].payload;
     const percentage = calculatePercentage(
       data.rawLevel,

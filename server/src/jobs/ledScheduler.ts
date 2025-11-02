@@ -30,7 +30,9 @@ export const scheduleLedNightMode = (settingsData: Settings) => {
   const { timeZone, ledNightMode } = settingsData;
 
   if (timeZone === null || !ledNightMode) {
-    logger.debug('LED night mode: timezone not set or ledNightMode not configured');
+    logger.debug(
+      'LED night mode: timezone not set or ledNightMode not configured',
+    );
     return;
   }
 

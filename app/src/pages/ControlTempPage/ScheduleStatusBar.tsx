@@ -60,7 +60,7 @@ export default function ScheduleStatusBar({
 
   const currentSchedule = getCurrentSchedule();
 
-  if (!currentSchedule || !currentSchedule.power.enabled) {
+  if (!currentSchedule?.power.enabled) {
     return null;
   }
 

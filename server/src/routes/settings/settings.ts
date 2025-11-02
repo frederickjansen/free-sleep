@@ -42,7 +42,9 @@ router.post('/settings', async (req: Request, res: Response) => {
           try {
             await updateDeviceStatus({ [side]: { isOn: false } });
           } catch (err) {
-            logger.warn(`Failed to power off ${side} side when enabling away mode: ${String(err)}`);
+            logger.warn(
+              `Failed to power off ${side} side when enabling away mode: ${String(err)}`,
+            );
           }
         } else {
           // Clearing away: remove any awayReturn timestamp

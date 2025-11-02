@@ -2,10 +2,11 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
+import logger from '../../logger.js';
 
 const router = express.Router();
 
-const LOGS_DIRS = [`${process.env.DATA_FOLDER}/logs`, '/var/log'];
+const LOGS_DIRS = [`${process.env.DATA_FOLDER}logs`, '/var/log'];
 
 // Endpoint to list all log files as clickable links
 router.get('/', (req, res) => {
@@ -13,13 +14,16 @@ router.get('/', (req, res) => {
 
   // Read logs from both directories
   LOGS_DIRS.forEach((dir) => {
-    if (!fs.existsSync(dir)) return;
+    if (!fs.existsSync(dir)) {
+      logger.warn(`Directory ${dir} does not exist`);
+    }
 
     try {
       const files = fs
         .readdirSync(dir)
         .map((file) => {
           const fullPath = path.join(dir, file);
+          logger.info(`Checking ${fullPath}`);
 
           try {
             const stat = fs.lstatSync(fullPath);
@@ -27,7 +31,7 @@ router.get('/', (req, res) => {
               ? { name: file, path: fullPath, mtime: stat.mtime.getTime() }
               : null;
           } catch (error) {
-            console.warn(`Skipping invalid file: ${fullPath}`);
+            logger.warn(`Skipping invalid file: ${fullPath}`);
             return null;
           }
         })
@@ -36,7 +40,7 @@ router.get('/', (req, res) => {
       // @ts-ignore
       allLogFiles = [...allLogFiles, ...files];
     } catch (err) {
-      console.error(`Error reading logs from ${dir}:`, err);
+      logger.error(`Error reading logs from ${dir}:`, err);
     }
   });
 

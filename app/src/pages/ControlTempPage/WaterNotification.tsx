@@ -21,7 +21,7 @@ export default function WaterNotification({
         <br />
         2. The water level is low, refill the water tank and run a prime cycle
         <br />
-        {/* eslint-disable-next-line max-len */}
+        {}
         3. If you've done step 1 & 2, the water tank is still FULL, and still
         see this message, reset the firmware on your pod and set it up in the 8
         sleep app. Our debugging ability here is limited, the app might have

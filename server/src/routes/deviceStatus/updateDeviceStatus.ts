@@ -19,7 +19,8 @@ const updateSide = async (
 ) => {
   await settingsDB.read();
   const settings = settingsDB.data;
-  const isAway = side === 'left' ? settings.left.awayMode : settings.right.awayMode;
+  const isAway =
+    side === 'left' ? settings.left.awayMode : settings.right.awayMode;
   // If the side is in away mode, only allow safe operations that ensure it's off
   // or clearing alarms. Block any attempt to turn on or change temperatures.
   if (isAway) {

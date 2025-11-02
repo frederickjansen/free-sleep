@@ -10,8 +10,8 @@ import { scheduleAlarm } from './alarmScheduler.js';
 import { scheduleElevations } from './baseScheduler.js';
 import { detectLeaks } from './leakDetection.js';
 import {
-    schedulePowerOffAndSleepAnalysis,
-    schedulePowerOn,
+  schedulePowerOffAndSleepAnalysis,
+  schedulePowerOn,
 } from './powerScheduler.js';
 import { schedulePrimingRebootAndCalibration } from './primeScheduler.js';
 import { scheduleTemperatures } from './temperatureScheduler.js';
@@ -64,12 +64,7 @@ async function setupJobs() {
 
       // Only schedule power-related jobs if power config exists
       if (schedule.power) {
-        schedulePowerOn(
-          settingsData,
-          side as Side,
-          day,
-          schedule.power,
-        );
+        schedulePowerOn(settingsData, side as Side, day, schedule.power);
         schedulePowerOffAndSleepAnalysis(
           settingsData,
           side as Side,
@@ -91,7 +86,9 @@ async function setupJobs() {
           );
         }
       } else {
-        logger.warn(`Skipping power scheduling for ${side} ${day} - missing power config`);
+        logger.warn(
+          `Skipping power scheduling for ${side} ${day} - missing power config`,
+        );
       }
       scheduleAlarm(settingsData, side as Side, day, schedule);
     });
@@ -108,7 +105,9 @@ async function setupJobs() {
     try {
       await detectLeaks();
     } catch (error) {
-      logger.error(`Error in scheduled leak detection: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Error in scheduled leak detection: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   });
 
@@ -118,7 +117,9 @@ async function setupJobs() {
     try {
       await cleanupOldReadings();
     } catch (error) {
-      logger.error(`Error in scheduled cleanup: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Error in scheduled cleanup: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   });
 

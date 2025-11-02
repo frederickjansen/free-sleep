@@ -26,10 +26,10 @@ export const sleepRecordUpdateSchema = z.object({
   left_bed_at: z.string().datetime().optional(),
   sleep_period_seconds: z.number().int().optional(),
   times_exited_bed: z.number().int().optional(),
-  present_intervals: z.array(
-    z.tuple([z.string().datetime(), z.string().datetime()]),
-  ).optional(),
-  not_present_intervals: z.array(
-    z.tuple([z.string().datetime(), z.string().datetime()]),
-  ).optional(),
+  present_intervals: z
+    .array(z.tuple([z.string().datetime(), z.string().datetime()]))
+    .optional(),
+  not_present_intervals: z
+    .array(z.tuple([z.string().datetime(), z.string().datetime()]))
+    .optional(),
 });

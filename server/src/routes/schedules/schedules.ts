@@ -71,7 +71,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     const { side, days, schedule, name } = body;
 
     if (!side || !schedule) {
-      res.status(400).json({ error: 'Missing required fields for create operation' });
+      res
+        .status(400)
+        .json({ error: 'Missing required fields for create operation' });
       return;
     }
 
@@ -81,7 +83,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     // In basic mode, days parameter is optional (always assigns to all days)
     // In day-specific mode, days parameter is required
     if (!isBasicMode && !days) {
-      res.status(400).json({ error: 'days parameter required in day-specific mode' });
+      res
+        .status(400)
+        .json({ error: 'days parameter required in day-specific mode' });
       return;
     }
 
@@ -105,11 +109,21 @@ router.post('/schedules', async (req: Request, res: Response) => {
     schedulesDB.data[typedSide].schedules![newEntity.id] = newEntity;
 
     // Determine which days to assign
-    const allDays: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const allDays: DayOfWeek[] = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
 
     if (isBasicMode) {
       // In basic mode: Only assign to days and set as active if this is the FIRST schedule
-      const scheduleCount = Object.keys(schedulesDB.data[typedSide].schedules!).length;
+      const scheduleCount = Object.keys(
+        schedulesDB.data[typedSide].schedules!,
+      ).length;
       const isFirstSchedule = scheduleCount === 1; // We just added one, so 1 means it's the first
 
       if (isFirstSchedule) {
@@ -118,11 +132,15 @@ router.post('/schedules', async (req: Request, res: Response) => {
           schedulesDB.data[typedSide].assignments![day] = newEntity.id;
         });
         schedulesDB.data[typedSide].activeScheduleId = newEntity.id;
-        logger.info(`First schedule in basic mode - assigned to all days and set as active`);
+        logger.info(
+          `First schedule in basic mode - assigned to all days and set as active`,
+        );
       } else {
         // Subsequent schedules: just store them, don't assign to days or set as active
         // User will explicitly switch to them when ready
-        logger.info(`Additional schedule in basic mode - stored but not assigned (user can switch to it later)`);
+        logger.info(
+          `Additional schedule in basic mode - stored but not assigned (user can switch to it later)`,
+        );
       }
     } else {
       // Day-specific mode: assign to specified days
@@ -139,7 +157,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     Object.assign(schedulesDB.data[typedSide], syncedDays);
 
     await schedulesDB.write();
-    logger.info(`Created schedule entity ${newEntity.id}${name ? ` (${name})` : ''}`);
+    logger.info(
+      `Created schedule entity ${newEntity.id}${name ? ` (${name})` : ''}`,
+    );
     res.status(200).json(schedulesDB.data);
     return;
   }
@@ -149,7 +169,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     const { side, scheduleId, days, schedule, name } = body;
 
     if (!side || !scheduleId || !schedule) {
-      res.status(400).json({ error: 'Missing required fields for updateGroup operation' });
+      res
+        .status(400)
+        .json({ error: 'Missing required fields for updateGroup operation' });
       return;
     }
 
@@ -159,7 +181,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     // In day-specific mode, days parameter is required
     // In basic mode, days parameter is optional (always updates all days)
     if (!isBasicMode && !days) {
-      res.status(400).json({ error: 'days parameter required in day-specific mode' });
+      res
+        .status(400)
+        .json({ error: 'days parameter required in day-specific mode' });
       return;
     }
 
@@ -171,12 +195,21 @@ router.post('/schedules', async (req: Request, res: Response) => {
     // Update entity
     schedulesDB.data[typedSide].schedules![scheduleId].data = schedule;
     if (name !== undefined) {
-      schedulesDB.data[typedSide].schedules![scheduleId].name = name || undefined;
+      schedulesDB.data[typedSide].schedules![scheduleId].name =
+        name || undefined;
     }
     schedulesDB.data[typedSide].schedules![scheduleId].updatedAt = Date.now();
 
     // Reassign days to this schedule
-    const allDays: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const allDays: DayOfWeek[] = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
     const daysToAssign = isBasicMode ? allDays : days;
     daysToAssign.forEach((day: DayOfWeek) => {
       schedulesDB.data[typedSide].assignments![day] = scheduleId;
@@ -190,7 +223,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     Object.assign(schedulesDB.data[typedSide], syncedDays);
 
     await schedulesDB.write();
-    logger.info(`Updated schedule entity ${scheduleId}${name ? ` (${name})` : ''} for ${daysToAssign.join(', ')}`);
+    logger.info(
+      `Updated schedule entity ${scheduleId}${name ? ` (${name})` : ''} for ${daysToAssign.join(', ')}`,
+    );
     res.status(200).json(schedulesDB.data);
     return;
   }
@@ -200,7 +235,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     const { side, day, scheduleId } = body;
 
     if (!side || !day || !scheduleId) {
-      res.status(400).json({ error: 'Missing required fields for ungroupDay operation' });
+      res
+        .status(400)
+        .json({ error: 'Missing required fields for ungroupDay operation' });
       return;
     }
 
@@ -215,7 +252,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     // Clone entity
     const clonedEntity: ScheduleEntity = {
       id: randomUUID(),
-      data: _.cloneDeep(schedulesDB.data[typedSide].schedules![scheduleId].data),
+      data: _.cloneDeep(
+        schedulesDB.data[typedSide].schedules![scheduleId].data,
+      ),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -231,7 +270,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     Object.assign(schedulesDB.data[typedSide], syncedDays);
 
     await schedulesDB.write();
-    logger.info(`Ungrouped day ${typedDay} with new schedule entity ${clonedEntity.id}`);
+    logger.info(
+      `Ungrouped day ${typedDay} with new schedule entity ${clonedEntity.id}`,
+    );
     res.status(200).json(schedulesDB.data);
     return;
   }
@@ -241,12 +282,16 @@ router.post('/schedules', async (req: Request, res: Response) => {
     const { side, mode } = body;
 
     if (!side || !mode) {
-      res.status(400).json({ error: 'Missing required fields for setMode operation' });
+      res
+        .status(400)
+        .json({ error: 'Missing required fields for setMode operation' });
       return;
     }
 
     if (mode !== 'day-specific' && mode !== 'basic') {
-      res.status(400).json({ error: 'Invalid mode. Must be day-specific or basic' });
+      res
+        .status(400)
+        .json({ error: 'Invalid mode. Must be day-specific or basic' });
       return;
     }
 
@@ -254,9 +299,18 @@ router.post('/schedules', async (req: Request, res: Response) => {
 
     if (mode === 'basic') {
       // Switching to basic mode: pick current day's schedule as active
-      const allDays: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const allDays: DayOfWeek[] = [
+        'sunday',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+      ];
       const currentDay = allDays[new Date().getDay()];
-      const activeScheduleId = schedulesDB.data[typedSide].assignments?.[currentDay];
+      const activeScheduleId =
+        schedulesDB.data[typedSide].assignments?.[currentDay];
 
       if (activeScheduleId) {
         schedulesDB.data[typedSide].activeScheduleId = activeScheduleId;
@@ -291,14 +345,20 @@ router.post('/schedules', async (req: Request, res: Response) => {
     const { side, scheduleId } = body;
 
     if (!side || !scheduleId) {
-      res.status(400).json({ error: 'Missing required fields for switchBasicSchedule operation' });
+      res
+        .status(400)
+        .json({
+          error: 'Missing required fields for switchBasicSchedule operation',
+        });
       return;
     }
 
     const typedSide = side as Side;
 
     if (schedulesDB.data[typedSide].mode !== 'basic') {
-      res.status(400).json({ error: 'Can only switch schedules in basic mode' });
+      res
+        .status(400)
+        .json({ error: 'Can only switch schedules in basic mode' });
       return;
     }
 
@@ -311,7 +371,15 @@ router.post('/schedules', async (req: Request, res: Response) => {
     schedulesDB.data[typedSide].activeScheduleId = scheduleId;
 
     // Assign to all days
-    const allDays: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const allDays: DayOfWeek[] = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
     allDays.forEach((day) => {
       schedulesDB.data[typedSide].assignments![day] = scheduleId;
     });
@@ -324,7 +392,9 @@ router.post('/schedules', async (req: Request, res: Response) => {
     Object.assign(schedulesDB.data[typedSide], syncedDays);
 
     await schedulesDB.write();
-    logger.info(`Switched ${typedSide} side to schedule ${scheduleId} in basic mode`);
+    logger.info(
+      `Switched ${typedSide} side to schedule ${scheduleId} in basic mode`,
+    );
     res.status(200).json(schedulesDB.data);
     return;
   }

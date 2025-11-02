@@ -15,7 +15,7 @@ export default function RoomClimate({
 }: RoomClimateProps) {
   const { roomClimate } = deviceStatus;
 
-  if (!roomClimate || roomClimate.temperatureC === undefined) {
+  if (roomClimate?.temperatureC === undefined) {
     return null;
   }
 

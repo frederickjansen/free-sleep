@@ -1,10 +1,10 @@
 import express from 'express';
 import {
-    getWaterLevelReadings,
-    getLeakAlerts,
-    dismissAlert,
-    getLeakDetectionSystemStatus,
-    getWaterLevelSummary,
+  getWaterLevelReadings,
+  getLeakAlerts,
+  dismissAlert,
+  getLeakDetectionSystemStatus,
+  getWaterLevelSummary,
 } from './waterLevel.js';
 
 const router = express.Router();
