@@ -1,15 +1,14 @@
 import { useSchedules } from '@api/schedules';
-import type { DayOfWeek } from '@api/schedulesSchema';
 import { useSettings } from '@api/settings';
-import { useAppStore } from '@state/appStore.tsx';
 import { LOWERCASE_DAYS } from '@/pages/SchedulePage/days.ts';
 import ScheduleOverview from '@/pages/SchedulePage/ScheduleOverview.tsx';
 import { useScheduleStore } from '@/pages/SchedulePage/scheduleStore.tsx';
 import moment from 'moment-timezone';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import PageContainer from '@/pages/shared/PageContainer.tsx';
 import SideControl from '@/components/SideControl.tsx';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
+import type { DayOfWeek } from '@api/schedulesSchema.ts';
 
 const getAdjustedDayOfWeek = (timezone: string | null): DayOfWeek => {
   // Get the current moment in the server's configured timezone
@@ -30,11 +29,17 @@ const getAdjustedDayOfWeek = (timezone: string | null): DayOfWeek => {
 };
 
 export default function ScheduleIndexPage() {
-  const { data: schedules, refetch } = useSchedules();
+  const { data: schedules, refetch, isLoading } = useSchedules();
   const { data: settings } = useSettings();
-  const { side } = useAppStore();
   const { setOriginalSchedules, selectDay } = useScheduleStore();
-  const navigate = useNavigate();
+  const { scheduleId } = useParams();
+  const { pathname } = useLocation();
+
+  // A child route is active if we have a scheduleId or are on the 'new' path.
+  const isChildRouteActive = useMemo(
+    () => !!scheduleId || pathname.endsWith('/schedules/new'),
+    [scheduleId, pathname],
+  );
 
   useEffect(() => {
     if (!settings) return;
@@ -47,34 +52,7 @@ export default function ScheduleIndexPage() {
     setOriginalSchedules(schedules);
   }, [schedules, setOriginalSchedules]);
 
-  const handleEditDay = (dayIndex: number) => {
-    if (!schedules) return;
-
-    const day = LOWERCASE_DAYS[dayIndex];
-    const sideSchedules = schedules[side];
-
-    // Find the schedule ID for this day
-    const scheduleId = sideSchedules.assignments?.[day];
-
-    if (scheduleId) {
-      // Navigate to edit page with the schedule ID
-      navigate(`/schedules/${scheduleId}`);
-    } else {
-      // Fallback: if no schedule exists for this day, create new
-      navigate('/schedules/new');
-    }
-  };
-
-  const handleEditGroup = (scheduleId: string) => {
-    // Navigate to edit page with scheduleId
-    navigate(`/schedules/${scheduleId}`);
-  };
-
-  const handleCreateNew = () => {
-    navigate('/schedules/new');
-  };
-
-  if (!schedules) {
+  if (isLoading || !schedules) {
     return null;
   }
 
@@ -90,15 +68,14 @@ export default function ScheduleIndexPage() {
         mb: 15,
       }}
     >
-      <SideControl title={'Schedules'} />
-
-      <ScheduleOverview
-        schedules={schedules}
-        onEditDay={handleEditDay}
-        onEditGroup={handleEditGroup}
-        onCreateNew={handleCreateNew}
-        onRefresh={refetch}
-      />
+      {isChildRouteActive ? (
+        <Outlet />
+      ) : (
+        <>
+          <SideControl title={'Schedules'} />
+          <ScheduleOverview schedules={schedules} onRefresh={refetch} />
+        </>
+      )}
     </PageContainer>
   );
 }

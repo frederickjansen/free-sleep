@@ -19,20 +19,15 @@ import GroupedScheduleCard from './GroupedScheduleCard.tsx';
 import { formatGroupedDays, groupSideSchedule } from './scheduleGrouping.ts';
 import ScheduleModeSelector from './ScheduleModeSelector.tsx';
 import BasicScheduleList from './BasicScheduleList.tsx';
+import { useNavigate } from 'react-router-dom';
 
 type ScheduleOverviewProps = {
   schedules: SchedulesV2;
-  onEditDay: (dayIndex: number) => void;
-  onEditGroup: (scheduleId: string) => void;
-  onCreateNew: () => void;
   onRefresh: () => void;
 };
 
 export default function ScheduleOverview({
   schedules,
-  onEditDay,
-  onEditGroup,
-  onCreateNew,
   onRefresh,
 }: ScheduleOverviewProps) {
   const { side, setIsUpdating, setError, clearError } = useAppStore();
@@ -42,6 +37,7 @@ export default function ScheduleOverview({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
+  const navigate = useNavigate();
   const sideSchedules = schedules?.[side];
 
   // Add defensive check for undefined schedules or settings
@@ -111,6 +107,30 @@ export default function ScheduleOverview({
     // Show confirmation dialog
     setScheduleToDelete({ scheduleId, days });
     setDeleteDialogOpen(true);
+  };
+
+  const handleEditDay = (dayIndex: number) => {
+    if (!sideSchedules) return;
+
+    const day = LOWERCASE_DAYS[dayIndex];
+
+    // Find the schedule ID for this day
+    const scheduleId = sideSchedules.assignments?.[day];
+
+    if (scheduleId) {
+      // Navigate to edit page with the schedule ID
+      navigate(`/schedules/${scheduleId}`);
+    } else {
+      // Fallback: if no schedule exists for this day, create new
+      navigate('/schedules/new');
+    }
+  };
+
+  const handleEditGroup = (scheduleId: string) =>
+    navigate(`/schedules/${scheduleId}`);
+
+  const handleCreateNew = () => {
+    navigate('/schedules/new');
   };
 
   const handleConfirmDelete = async () => {
@@ -316,7 +336,7 @@ export default function ScheduleOverview({
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={onCreateNew}
+            onClick={handleCreateNew}
             fullWidth={isMobile}
             sx={{
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -390,7 +410,7 @@ export default function ScheduleOverview({
               </Typography>
               <Button
                 variant="outlined"
-                onClick={onCreateNew}
+                onClick={handleCreateNew}
                 startIcon={<Add />}
                 sx={{
                   color: '#fff',
@@ -545,8 +565,8 @@ export default function ScheduleOverview({
                       currentDay={currentDay}
                       displayCelsius={displayCelsius}
                       onToggleSchedule={handleToggleSchedule}
-                      onEditDay={onEditDay}
-                      onEditGroup={() => onEditGroup(group.scheduleId)}
+                      onEditDay={handleEditDay}
+                      onEditGroup={() => handleEditGroup(group.scheduleId)}
                       onDeleteSchedule={handleDeleteSchedule}
                     />
                   ))}
@@ -597,8 +617,8 @@ export default function ScheduleOverview({
                       currentDay={currentDay}
                       displayCelsius={displayCelsius}
                       onToggleSchedule={handleToggleSchedule}
-                      onEditDay={onEditDay}
-                      onEditGroup={() => onEditGroup(group.scheduleId)}
+                      onEditDay={handleEditDay}
+                      onEditGroup={() => handleEditGroup(group.scheduleId)}
                       onDeleteSchedule={handleDeleteSchedule}
                     />
                   ))}
@@ -612,7 +632,7 @@ export default function ScheduleOverview({
       {/* Floating Action Button for quick schedule creation - only in day-specific mode */}
       {!isBasicMode && (
         <Fab
-          onClick={onCreateNew}
+          onClick={handleCreateNew}
           sx={{
             position: 'fixed',
             bottom: { xs: 96, md: 82 }, // Account for mobile bottom navigation (80px) + padding

@@ -14,11 +14,13 @@ import ControlTempPage from './pages/ControlTempPage/ControlTempPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import Layout from './components/Layout';
 import SchedulePage from './pages/SchedulePage/ScheduleIndexPage.tsx';
+import ScheduleNewPage from './pages/SchedulePage/ScheduleNewPage.tsx';
+import ScheduleEditPage from './pages/SchedulePage/ScheduleEditPage.tsx';
 import SleepPage from './pages/DataPage/SleepPage/SleepPage.tsx';
 import DataPage from './pages/DataPage/DataPage.tsx';
 import VitalsPage from './pages/DataPage/VitalsPage/VitalsPage.tsx';
 import LogsPage from './pages/DataPage/LogsPage/LogsPage.tsx';
-import WaterLevelPage from "@/pages/WaterLevelPage/WaterLevelPage.tsx";
+import WaterLevelPage from '@/pages/WaterLevelPage/WaterLevelPage.tsx';
 
 const darkTheme = createTheme({
   palette: {
@@ -147,25 +149,27 @@ const App = () => {
               }}
             />
             <BrowserRouter basename="/">
-                <Routes>
-                    <Route path="/" element={<Layout />}>
-                        <Route index element={<SettingsPage />} />
-                        <Route path="temperature" element={<ControlTempPage />} />
-                        <Route path="left" element={<ControlTempPage />} />
-                        <Route path="right" element={<ControlTempPage />} />
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<SettingsPage />} />
+                  <Route path="temperature" element={<ControlTempPage />} />
+                  <Route path="left" element={<ControlTempPage />} />
+                  <Route path="right" element={<ControlTempPage />} />
 
-                        <Route path="data" element={<DataPage />}>
-                            <Route path="sleep" element={<SleepPage />} />
-                            <Route path="logs" element={<LogsPage />} />
-                            <Route path="vitals" element={<VitalsPage />} />
-                        </Route>
+                  <Route path="data" element={<DataPage />}>
+                    <Route path="sleep" element={<SleepPage />} />
+                    <Route path="logs" element={<LogsPage />} />
+                    <Route path="vitals" element={<VitalsPage />} />
+                  </Route>
 
-                        <Route path="settings" element={<SettingsPage />} />
-                        <Route path="schedules" element={<SchedulePage />} />
-                        <Route path="water-level" element={<WaterLevelPage />} />
-                    </Route>
-                </Routes>
-
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="schedules" element={<SchedulePage />}>
+                    <Route path="new" element={<ScheduleNewPage />} />
+                    <Route path=":scheduleId" element={<ScheduleEditPage />} />
+                  </Route>
+                  <Route path="water-level" element={<WaterLevelPage />} />
+                </Route>
+              </Routes>
             </BrowserRouter>
           </AppStoreProvider>
         </LocalizationProvider>
