@@ -21,6 +21,7 @@ import DataPage from './pages/DataPage/DataPage.tsx';
 import VitalsPage from './pages/DataPage/VitalsPage/VitalsPage.tsx';
 import LogsPage from './pages/DataPage/LogsPage/LogsPage.tsx';
 import WaterLevelPage from '@/pages/WaterLevelPage/WaterLevelPage.tsx';
+import AmbientLightPage from "@/pages/DataPage/AmbientLightPage/AmbientLightPage.tsx";
 
 const darkTheme = createTheme({
   palette: {
@@ -157,6 +158,7 @@ const App = () => {
                   <Route path="right" element={<ControlTempPage />} />
 
                   <Route path="data" element={<DataPage />}>
+                    <Route path="ambient-light" element={<AmbientLightPage />} />
                     <Route path="sleep" element={<SleepPage />} />
                     <Route path="logs" element={<LogsPage />} />
                     <Route path="vitals" element={<VitalsPage />} />
