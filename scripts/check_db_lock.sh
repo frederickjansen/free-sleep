@@ -88,15 +88,15 @@ else
 fi
 echo ""
 
-# Check for bun/node processes
-echo -e "${BLUE}Checking for Bun/Node processes...${NC}"
-BUN_PROCESSES=$(ps aux | grep -E '[b]un.*server|[n]ode.*server|[b]un.*prisma' | grep -v grep || true)
+# Check for node processes
+echo -e "${BLUE}Checking for Node processes...${NC}"
+NODE_PROCESSES=$(ps aux | grep -E '[n]ode.*server' | grep -v grep || true)
 
-if [ -n "$BUN_PROCESSES" ]; then
-  echo -e "${YELLOW}⚠ Found Bun/Node processes:${NC}"
-  echo "$BUN_PROCESSES"
+if [ -n "$NODE_PROCESSES" ]; then
+  echo -e "${YELLOW}⚠ Found Node processes:${NC}"
+  echo "$NODE_PROCESSES"
 else
-  echo -e "${GREEN}✓ No Bun/Node server processes found${NC}"
+  echo -e "${GREEN}✓ No Node server processes found${NC}"
 fi
 echo ""
 
@@ -116,7 +116,7 @@ if [ -f "${DB_PATH}-wal" ] || [ -f "${DB_PATH}-shm" ]; then
   echo ""
   echo "  2. Or manually stop services before migration:"
   echo -e "     ${GREEN}sudo systemctl stop free-sleep free-sleep-stream${NC}"
-  echo -e "     ${GREEN}bun run migrate <migration_name>${NC}"
+  echo -e "     ${GREEN}/home/dac/.volta/bin/npm migrate <migration_name>${NC}"
   echo -e "     ${GREEN}sudo systemctl start free-sleep free-sleep-stream${NC}"
 else
   echo -e "${GREEN}Database appears to be idle. You should be able to run migrations.${NC}"

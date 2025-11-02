@@ -148,7 +148,7 @@ run_migration() {
     echo -e "${YELLOW}Checking migration status...${NC}"
 
     # Try to get migration status (this might fail if out of sync)
-    if ! bun run dotenv -e "$env_file" -- bun x prisma migrate status 2>&1 | tee /tmp/migrate_status.txt; then
+    if ! /home/dac/.volta/bin/npx dotenv -e "$env_file" -- /home/dac/.volta/bin/npx prisma migrate status 2>&1 | tee /tmp/migrate_status.txt; then
       if grep -q "missing from the local migrations directory" /tmp/migrate_status.txt; then
         echo ""
         echo -e "${RED}ERROR: Local migrations are out of sync with database${NC}"
@@ -164,10 +164,10 @@ run_migration() {
         echo -e "     ${GREEN}git pull origin main${NC}"
         echo ""
         echo "  2. If you're sure local migrations are correct, reset database (⚠️ DESTROYS DATA):"
-        echo -e "     ${GREEN}bun run migrate:reset${NC}"
+        echo -e "     ${GREEN}/home/dec/.volta/bin/npx migrate:reset${NC}"
         echo ""
         echo "  3. Manually sync migrations from database:"
-        echo -e "     ${GREEN}bun x prisma migrate resolve --applied <migration_name>${NC}"
+        echo -e "     ${GREEN}/home/dac/.volta/bin/npx prisma migrate resolve --applied <migration_name>${NC}"
         echo ""
         return 1
       fi
@@ -176,7 +176,7 @@ run_migration() {
   fi
 
   # Run the migration with the appropriate env file
-  if bun run dotenv -e "$env_file" -- bun x prisma migrate dev --name "$MIGRATION_NAME"; then
+  if /home/dac/.volta/bin/npx dotenv -e "$env_file" -- /home/dac/.volta/bin/npx prisma migrate dev --name "$MIGRATION_NAME"; then
     echo ""
     echo -e "${GREEN}✓ Migration completed successfully!${NC}"
     return 0

@@ -19,6 +19,8 @@ NC='\033[0m' # No Color
 # Determine the server directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/../server" && pwd)"
+USERNAME="dac"
+
 
 echo "==================================================================="
 echo "           Free Sleep Migration Sync Helper"
@@ -31,7 +33,7 @@ cd "$SERVER_DIR"
 echo -e "${BLUE}Checking migration status...${NC}"
 echo ""
 
-if bun run dotenv -e .env.pod -- bun x prisma migrate status 2>&1 | tee /tmp/migrate_status_full.txt; then
+if /home/$USERNAME/.volta/bin/npx dotenv -e .env.pod -- /home/$USERNAME/.volta/bin/npx prisma migrate status 2>&1 | tee /tmp/migrate_status_full.txt; then
   echo ""
   echo -e "${GREEN}✓ Migrations are in sync${NC}"
   exit 0
@@ -97,7 +99,7 @@ case $choice in
       echo "Checking migration status again..."
       cd "$SERVER_DIR"
 
-      if bun run dotenv -e .env.pod -- bun x prisma migrate status; then
+      if /home/$USERNAME/.volta/bin/npx dotenv -e .env.pod -- /home/$USERNAME/.volta/bin/npx prisma migrate status; then
         echo ""
         echo -e "${GREEN}✓ Migrations are now in sync!${NC}"
       else
@@ -129,7 +131,7 @@ case $choice in
     echo "Marking migrations as applied..."
     echo "$MISSING_MIGRATIONS" | while read -r migration; do
       echo "  Processing: $migration"
-      if bun run dotenv -e .env.pod -- bun x prisma migrate resolve --applied "$migration"; then
+      if /home/$USERNAME/.volta/bin/npx dotenv -e .env.pod -- /home/$USERNAME/.volta/bin/npx prisma migrate resolve --applied "$migration"; then
         echo -e "  ${GREEN}✓ Marked as applied${NC}"
       else
         echo -e "  ${RED}✗ Failed to mark as applied${NC}"
@@ -138,7 +140,7 @@ case $choice in
 
     echo ""
     echo "Checking migration status..."
-    if bun run dotenv -e .env.pod -- bun x prisma migrate status; then
+    if /home/$USERNAME/.volta/bin/npx dotenv -e .env.pod -- /home/$USERNAME/.volta/bin/npx prisma migrate status; then
       echo ""
       echo -e "${GREEN}✓ Migrations are now in sync!${NC}"
     else

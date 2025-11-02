@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_ENV=dev NODE_ENV=development vite",
     "start": "vite",
-    "build": "vite build && tsc",
+    "build": "VITE_ENV=prod NODE_ENV=production tsc -b && vite build",
     "serve": "vite preview",
     "test": "vitest run",
     "format": "biome format",

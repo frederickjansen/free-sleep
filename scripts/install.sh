@@ -53,14 +53,6 @@ fetch_github_commit_info() {
   return 1
 }
 
-# Ensure bun directory ownership is correct
-fix_bun_ownership() {
-  local username="$1"
-  if [ -d "/home/$username/.bun" ]; then
-    chown -R "$username":"$username" "/home/$username/.bun" || true
-  fi
-}
-
 # Run command as user with optional timeout
 run_as_user_with_timeout() {
   local username="$1"
@@ -79,7 +71,7 @@ build_service_path() {
   local username="$1"
   local volta_detected="$2"
 
-  local service_path="/home/$username/.bun/bin:/home/$username/free-sleep/server/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+  local service_path="/home/$username/free-sleep/server/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
   if [ "$volta_detected" = true ]; then
     service_path="/home/$username/.volta/bin:$service_path"
   fi
@@ -99,13 +91,12 @@ Description=Free Sleep Server
 After=network.target
 
 [Service]
-ExecStart=/home/$username/.bun/bin/bun run dev
+ExecStart=/home/$username/.volta/bin/npm start
 WorkingDirectory=$server_dir
 Restart=always
 RestartSec=5
 User=$username
 Environment=NODE_ENV=production
-Environment=BUN_INSTALL=/home/$username/.bun
 Environment=PATH=$service_path
 # Prevent rapid restart loops during installation
 StartLimitInterval=60
@@ -116,7 +107,7 @@ WantedBy=multi-user.target
 EOF
 }
 
-# Apply IPv6 workarounds for bun install issues
+# Apply IPv6 workarounds for npm install issues
 apply_ipv6_workarounds() {
   echo "Applying IPv6 workarounds..."
   # Disable IPv6 (runtime)
@@ -231,7 +222,6 @@ echo ""
 echo "This script will check and update the following components:"
 echo "  - Service management (stop services before installation, restore after)"
 echo "  - Repository code (skipped if already present)"
-echo "  - Bun runtime (skipped if already installed)"
 echo "  - Node.js v22.18.0 (skipped if correct version installed)"
 echo "  - Server dependencies (includes automatic frontend build)"
 echo "  - SystemD service (updated, restored to previous state)"
@@ -413,22 +403,6 @@ else
 fi
 
 # --------------------------------------------------------------------------------
-# Install or update Bun
-# - We check once. If it’s not installed, install it.
-echo "Checking if Bun is installed for user '$USERNAME'..."
-if sudo -u "$USERNAME" bash -l -c 'command -v bun' >/dev/null 2>&1; then
-  echo "Bun is already installed for user '$USERNAME'."
-else
-  echo "Bun is not installed. Installing for user '$USERNAME'..."
-  sudo -u "$USERNAME" bash -c 'curl -fsSL https://bun.sh/install | bash'
-  # Ensure Bun environment variables are in the DAC user's profile:
-  if ! grep -q 'export BUN_INSTALL=' "/home/$USERNAME/.profile"; then
-    echo -e '\nexport BUN_INSTALL="/home/dac/.bun"\nexport PATH="$BUN_INSTALL/bin:$PATH"\n' \
-      >>"/home/$USERNAME/.profile"
-  fi
-fi
-
-# --------------------------------------------------------------------------------
 # Update Node.js to version 22 (with Volta support)
 echo "Checking Node.js version..."
 NODE_VERSION="22.18.0"
@@ -522,38 +496,28 @@ echo "Checking server dependencies..."
 if [ -d "$SERVER_DIR/node_modules" ] && [ "$(ls -A $SERVER_DIR/node_modules)" ]; then
   echo "Dependencies appear to be installed. Checking if update is needed..."
 
-  # Ensure bun directory has correct ownership
-  fix_bun_ownership "$USERNAME"
-
-  # Run bun install anyway to update/verify dependencies, but with shorter timeout
-  echo "Running bun install to verify/update dependencies..."
-  run_as_user_with_timeout "$USERNAME" 60 "cd '$SERVER_DIR' && /home/$USERNAME/.bun/bin/bun install" || echo "Dependency check completed (may have been interrupted)"
+  # Run npm install anyway to update/verify dependencies, but with shorter timeout
+  echo "Running npm install to verify/update dependencies..."
+  run_as_user_with_timeout "$USERNAME" 60 "cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npm ci" || echo "Dependency check completed (may have been interrupted)"
 else
   echo "Installing dependencies in $SERVER_DIR ..."
 
-  # Fix potential permission issues with bun cache directory
-  echo "Ensuring bun cache directory has correct ownership..."
-  fix_bun_ownership "$USERNAME"
-
   if command -v timeout >/dev/null 2>&1; then
-    echo "Running bun install with a 180s timeout to detect hangs..."
-    if ! run_as_user_with_timeout "$USERNAME" 180 "cd '$SERVER_DIR' && /home/$USERNAME/.bun/bin/bun install"; then
-      echo "bun install failed or timed out. Clearing cache and applying workarounds..."
+    echo "Running npm install with a 180s timeout to detect hangs..."
+    if ! run_as_user_with_timeout "$USERNAME" 180 "cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npm ci"; then
+      echo "npm install failed or timed out. Clearing cache and applying workarounds..."
 
-      # Clear bun cache to resolve permission issues
-      echo "Clearing bun cache..."
-      sudo -u "$USERNAME" bash -c "/home/$USERNAME/.bun/bin/bun pm cache rm" || true
+      # Clear npm cache to resolve permission issues
+      echo "Clearing npm cache..."
+      sudo -u "$USERNAME" bash -c "/home/$USERNAME/.volta/bin/npm cache clean --force" || true
 
       # Apply IPv6 workarounds
       apply_ipv6_workarounds
 
-      # Ensure ownership is correct again after cache clear
-      fix_bun_ownership "$USERNAME"
-
-      # Retry bun install
-      echo "Retrying bun install..."
-      if ! sudo -u "$USERNAME" bash -c "cd '$SERVER_DIR' && /home/$USERNAME/.bun/bin/bun install"; then
-        echo "ERROR: bun install failed after applying workarounds."
+      # Retry npm install
+      echo "Retrying npm install..."
+      if ! sudo -u "$USERNAME" bash -c "cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npm ci"; then
+        echo "ERROR: npm install failed after applying workarounds."
         echo "This could be due to:"
         echo "  1. Network connectivity issues"
         echo "  2. Disk space issues"
@@ -562,30 +526,27 @@ else
         echo ""
         echo "You can try the following manual steps:"
         echo "  1. Check disk space: df -h"
-        echo "  2. Clear all bun cache: sudo -u $USERNAME /home/$USERNAME/.bun/bin/bun pm cache clear"
+        echo "  2. Clear all npm cache: sudo -u $USERNAME /home/$USERNAME/.volta/bin/npm cache clean --force"
         echo "  3. Remove node_modules: rm -rf '$SERVER_DIR/node_modules'"
-        echo "  4. Try installing manually: cd '$SERVER_DIR' && sudo -u $USERNAME /home/$USERNAME/.bun/bin/bun install"
+        echo "  4. Try installing manually: cd '$SERVER_DIR' && sudo -u $USERNAME /home/$USERNAME/.volta/bin/npm ci"
         echo ""
         exit 1
       fi
     fi
   else
-    echo "'timeout' command not found. Running bun install normally. If it hangs at 'Resolving...', run /home/dac/free-sleep/scripts/disable_ipv6.sh and re-run the installer."
-    # Still fix permissions even without timeout
-    fix_bun_ownership "$USERNAME"
-    sudo -u "$USERNAME" bash -c "cd '$SERVER_DIR' && /home/$USERNAME/.bun/bin/bun install"
+    echo "'timeout' command not found. Running npm install normally. If it hangs at 'Resolving...', run /home/dac/free-sleep/scripts/disable_ipv6.sh and re-run the installer."
+    sudo -u "$USERNAME" bash -c "cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npm ci"
   fi
 fi
 
 echo "Running Prisma migrations..."
 # Run Prisma migrations directly (install.sh already handles service management)
-# Ensure Bun is in PATH for nested spawns inside the npm script (dotenv -> bun x ...)
-if sudo -u "$USERNAME" bash -c "export BUN_INSTALL=/home/$USERNAME/.bun; export PATH=/home/$USERNAME/.bun/bin:$PATH; cd '$SERVER_DIR' && bun run dotenv -e .env.pod -- bun x prisma migrate deploy"; then
+if sudo -u "$USERNAME" bash -c "cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npx dotenv -e .env.pod -- /home/$USERNAME/.volta/bin/npx prisma migrate deploy"; then
   echo "Prisma migrations completed successfully."
 else
   echo "WARNING: Prisma migrations failed or were interrupted. This may happen if the database needs to be reset."
   echo "The server will still start, but you may need to run migrations manually later."
-  echo "To reset and migrate manually, run: cd '$SERVER_DIR' && bun run migrate:reset && bun run migrate deploy"
+  echo "To reset and migrate manually, run: cd '$SERVER_DIR' && /home/$USERNAME/.volta/bin/npm run migrate:reset && /home/$USERNAME/.volta/bin/npm run migrate deploy"
 fi
 
 # --------------------------------------------------------------------------------
@@ -926,7 +887,6 @@ if [ "$VOLTA_DETECTED" = true ]; then
 else
   echo "  - Node.js: $(node -v 2>/dev/null || echo 'Not found') (system)"
 fi
-echo "  - Bun: $(sudo -u "$USERNAME" bash -c '/home/dac/.bun/bin/bun --version' 2>/dev/null || echo 'Not found')"
 
 echo ""
 echo "Time synchronization status:"
