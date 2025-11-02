@@ -38,7 +38,9 @@ export const schedulePowerOn = (
           targetTemperatureF: power.onTemperature,
         },
       });
-      logger.info(`Successfully turned on ${side} side at scheduled time ${time} with temperature ${power.onTemperature}°F`);
+      logger.info(
+        `Successfully turned on ${side} side at scheduled time ${time} with temperature ${power.onTemperature}°F`,
+      );
     } catch (error) {
       logger.error(`Failed to turn on ${side} side at ${time}: ${error}`);
     }
@@ -125,7 +127,9 @@ export const schedulePowerOffAndSleepAnalysis = (
             isOn: false,
           },
         });
-        logger.info(`Successfully turned off ${side} side at scheduled time ${time}`);
+        logger.info(
+          `Successfully turned off ${side} side at scheduled time ${time}`,
+        );
       } catch (error) {
         logger.error(`Failed to turn off ${side} side at ${time}: ${error}`);
       }

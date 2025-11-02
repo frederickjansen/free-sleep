@@ -35,19 +35,22 @@ export const SettingsSchema = z
     temperatureFormat: Temperatures,
     rebootDaily: z.boolean(),
     alarmButtonBehavior: AlarmButtonBehaviors,
-    ledNightMode: z.object({
-      enabled: z.boolean(),
-      dayBrightness: z.number().int().min(0).max(100),
-      nightBrightness: z.number().int().min(0).max(100),
-      nightStartTime: TimeSchema,
-      nightEndTime: TimeSchema,
-    }).optional().default({
-      enabled: false,
-      dayBrightness: 50,
-      nightBrightness: 10,
-      nightStartTime: '22:00',
-      nightEndTime: '07:00',
-    }),
+    ledNightMode: z
+      .object({
+        enabled: z.boolean(),
+        dayBrightness: z.number().int().min(0).max(100),
+        nightBrightness: z.number().int().min(0).max(100),
+        nightStartTime: TimeSchema,
+        nightEndTime: TimeSchema,
+      })
+      .optional()
+      .default({
+        enabled: false,
+        dayBrightness: 50,
+        nightBrightness: 10,
+        nightStartTime: '22:00',
+        nightEndTime: '07:00',
+      }),
   })
   .strict();
 
@@ -59,18 +62,24 @@ export const SettingsUpdateSchema = z
   .object({
     timeZone: z.enum(TIME_ZONES).nullable().optional(),
     linkBothSides: z.boolean().optional(),
-    left: z.object({
-      name: z.string().min(1).max(20).optional(),
-      awayMode: z.boolean().optional(),
-      awayStart: z.string().datetime().nullable().optional(),
-      awayReturn: z.string().datetime().nullable().optional(),
-    }).strict().optional(),
-    right: z.object({
-      name: z.string().min(1).max(20).optional(),
-      awayMode: z.boolean().optional(),
-      awayStart: z.string().datetime().nullable().optional(),
-      awayReturn: z.string().datetime().nullable().optional(),
-    }).strict().optional(),
+    left: z
+      .object({
+        name: z.string().min(1).max(20).optional(),
+        awayMode: z.boolean().optional(),
+        awayStart: z.string().datetime().nullable().optional(),
+        awayReturn: z.string().datetime().nullable().optional(),
+      })
+      .strict()
+      .optional(),
+    right: z
+      .object({
+        name: z.string().min(1).max(20).optional(),
+        awayMode: z.boolean().optional(),
+        awayStart: z.string().datetime().nullable().optional(),
+        awayReturn: z.string().datetime().nullable().optional(),
+      })
+      .strict()
+      .optional(),
     lastPrime: z.string().datetime().optional(),
     primePodDaily: z
       .object({

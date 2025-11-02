@@ -1,6 +1,6 @@
 import { postDeviceStatus, useDeviceStatus } from '@api/deviceStatus';
-import type { Settings } from '@api/settingsSchema.ts';
 import { useSettings } from '@api/settings';
+import type { Settings } from '@api/settingsSchema.ts';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
 import {
   Alert,
@@ -12,9 +12,9 @@ import {
 } from '@mui/material';
 import Switch from '@mui/material/Switch';
 import { useAppStore } from '@state/appStore.tsx';
-import { isNightTime } from '@/utils/scheduleUtils';
 import { useEffect, useState } from 'react';
 import type { DeepPartial } from 'ts-essentials';
+import { isNightTime } from '@/utils/scheduleUtils';
 
 type LedNightModeControlProps = {
   settings?: Settings;

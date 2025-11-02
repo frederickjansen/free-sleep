@@ -5,23 +5,22 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AppStoreProvider } from '@state/appStore.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary.tsx';
-
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 
-import ControlTempPage from './pages/ControlTempPage/ControlTempPage';
-import SettingsPage from './pages/SettingsPage/SettingsPage';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import ErrorBoundary from '@/components/ErrorBoundary.tsx';
+import AmbientLightPage from '@/pages/DataPage/AmbientLightPage/AmbientLightPage.tsx';
+import WaterLevelPage from '@/pages/WaterLevelPage/WaterLevelPage.tsx';
 import Layout from './components/Layout';
+import ControlTempPage from './pages/ControlTempPage/ControlTempPage';
+import DataPage from './pages/DataPage/DataPage.tsx';
+import LogsPage from './pages/DataPage/LogsPage/LogsPage.tsx';
+import SleepPage from './pages/DataPage/SleepPage/SleepPage.tsx';
+import VitalsPage from './pages/DataPage/VitalsPage/VitalsPage.tsx';
+import ScheduleEditPage from './pages/SchedulePage/ScheduleEditPage.tsx';
 import SchedulePage from './pages/SchedulePage/ScheduleIndexPage.tsx';
 import ScheduleNewPage from './pages/SchedulePage/ScheduleNewPage.tsx';
-import ScheduleEditPage from './pages/SchedulePage/ScheduleEditPage.tsx';
-import SleepPage from './pages/DataPage/SleepPage/SleepPage.tsx';
-import DataPage from './pages/DataPage/DataPage.tsx';
-import VitalsPage from './pages/DataPage/VitalsPage/VitalsPage.tsx';
-import LogsPage from './pages/DataPage/LogsPage/LogsPage.tsx';
-import WaterLevelPage from '@/pages/WaterLevelPage/WaterLevelPage.tsx';
-import AmbientLightPage from "@/pages/DataPage/AmbientLightPage/AmbientLightPage.tsx";
+import SettingsPage from './pages/SettingsPage/SettingsPage';
 
 const darkTheme = createTheme({
   palette: {
@@ -158,7 +157,10 @@ const App = () => {
                   <Route path="right" element={<ControlTempPage />} />
 
                   <Route path="data" element={<DataPage />}>
-                    <Route path="ambient-light" element={<AmbientLightPage />} />
+                    <Route
+                      path="ambient-light"
+                      element={<AmbientLightPage />}
+                    />
                     <Route path="sleep" element={<SleepPage />} />
                     <Route path="logs" element={<LogsPage />} />
                     <Route path="vitals" element={<VitalsPage />} />

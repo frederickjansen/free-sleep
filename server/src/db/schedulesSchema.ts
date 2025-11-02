@@ -88,14 +88,17 @@ export type Side = keyof Schedules;
 export const DailyScheduleUpdateSchema = z
   .object({
     temperatures: z.record(TimeSchema, TemperatureSchema).optional(),
-    alarm: z.object({
-      time: TimeSchema.optional(),
-      vibrationIntensity: z.number().int().min(1).max(100).optional(),
-      vibrationPattern: z.enum(['double', 'rise']).optional(),
-      duration: z.number().int().positive().min(0).max(180).optional(),
-      enabled: z.boolean().optional(),
-      alarmTemperature: TemperatureSchema.optional(),
-    }).strict().optional(),
+    alarm: z
+      .object({
+        time: TimeSchema.optional(),
+        vibrationIntensity: z.number().int().min(1).max(100).optional(),
+        vibrationPattern: z.enum(['double', 'rise']).optional(),
+        duration: z.number().int().positive().min(0).max(180).optional(),
+        enabled: z.boolean().optional(),
+        alarmTemperature: TemperatureSchema.optional(),
+      })
+      .strict()
+      .optional(),
     power: z
       .object({
         on: TimeSchema.optional(),

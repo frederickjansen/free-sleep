@@ -48,9 +48,7 @@ const defaultData: Schedules = {
   right: _.cloneDeep(defaultSideSchedule),
 };
 
-const file = new JSONFile<SchedulesV2>(
-  `${config.lowDbFolder}schedulesDB.json`,
-);
+const file = new JSONFile<SchedulesV2>(`${config.lowDbFolder}schedulesDB.json`);
 const schedulesDB = new Low<SchedulesV2>(file, defaultData as SchedulesV2);
 await schedulesDB.read();
 

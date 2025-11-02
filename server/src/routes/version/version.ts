@@ -29,8 +29,13 @@ router.get('/version', async (req: Request, res: Response) => {
           fs.unlinkSync(gitInfoPath);
         } else {
           // Validate JSON structure before parsing
-          if (!gitInfoContent.startsWith('{') || !gitInfoContent.endsWith('}')) {
-            logger.warn('Git info file contains invalid JSON structure, removing it');
+          if (
+            !gitInfoContent.startsWith('{') ||
+            !gitInfoContent.endsWith('}')
+          ) {
+            logger.warn(
+              'Git info file contains invalid JSON structure, removing it',
+            );
             fs.unlinkSync(gitInfoPath);
           } else {
             const gitInfo = JSON.parse(gitInfoContent);
@@ -43,7 +48,10 @@ router.get('/version', async (req: Request, res: Response) => {
           }
         }
       } catch (parseError) {
-        logger.warn('Failed to parse git info file, removing corrupted file:', parseError);
+        logger.warn(
+          'Failed to parse git info file, removing corrupted file:',
+          parseError,
+        );
         // Remove the corrupted file so it doesn't cause issues in the future
         try {
           fs.unlinkSync(gitInfoPath);

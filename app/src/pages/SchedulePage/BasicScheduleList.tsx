@@ -1,16 +1,16 @@
+import { postSchedules } from '@api/schedules.ts';
+import type { Side, SideScheduleV2 } from '@api/schedulesSchema.ts';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Box,
   Button,
   Card,
   CardContent,
-  Typography,
   Chip,
+  Typography,
 } from '@mui/material';
 import { useAppStore } from '@state/appStore.tsx';
-import { postSchedules } from '@api/schedules.ts';
-import type { SideScheduleV2, Side } from '@api/schedulesSchema.ts';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate } from 'react-router-dom';
 
 interface BasicScheduleListProps {

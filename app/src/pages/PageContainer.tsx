@@ -1,7 +1,6 @@
-import React from 'react';
-import { Container, type ContainerProps } from '@mui/material';
-import { type SxProps } from '@mui/material';
+import { Container, type ContainerProps, type SxProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import React from 'react';
 
 type PageContainerProps = {
   containerProps?: ContainerProps;

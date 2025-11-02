@@ -13,13 +13,13 @@ import {
 import { useAppStore } from '@state/appStore.tsx';
 import moment from 'moment-timezone';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ConfirmDialog from '@/pages/shared/ConfirmDialog.tsx';
+import BasicScheduleList from './BasicScheduleList.tsx';
 import { LOWERCASE_DAYS } from './days.ts';
 import GroupedScheduleCard from './GroupedScheduleCard.tsx';
-import { formatGroupedDays, groupSideSchedule } from './scheduleGrouping.ts';
 import ScheduleModeSelector from './ScheduleModeSelector.tsx';
-import BasicScheduleList from './BasicScheduleList.tsx';
-import { useNavigate } from 'react-router-dom';
+import { formatGroupedDays, groupSideSchedule } from './scheduleGrouping.ts';
 
 type ScheduleOverviewProps = {
   schedules: SchedulesV2;

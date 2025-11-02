@@ -1,5 +1,6 @@
 import type { Settings } from '@api/settingsSchema.ts';
 import { Box, TextField, Typography } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -7,7 +8,6 @@ import { type Side, useAppStore } from '@state/appStore.tsx';
 import moment, { type Moment } from 'moment';
 import { useEffect, useState } from 'react';
 import type { DeepPartial } from 'ts-essentials';
-import Alert from '@mui/material/Alert';
 
 type AwayModeSwitchProps = {
   side: Side;

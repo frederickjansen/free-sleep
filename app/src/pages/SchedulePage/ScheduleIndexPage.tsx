@@ -1,14 +1,14 @@
 import { useSchedules } from '@api/schedules';
+import type { DayOfWeek } from '@api/schedulesSchema.ts';
 import { useSettings } from '@api/settings';
+import moment from 'moment-timezone';
+import { useEffect, useMemo } from 'react';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
+import SideControl from '@/components/SideControl.tsx';
 import { LOWERCASE_DAYS } from '@/pages/SchedulePage/days.ts';
 import ScheduleOverview from '@/pages/SchedulePage/ScheduleOverview.tsx';
 import { useScheduleStore } from '@/pages/SchedulePage/scheduleStore.tsx';
-import moment from 'moment-timezone';
-import { useEffect, useMemo } from 'react';
 import PageContainer from '@/pages/shared/PageContainer.tsx';
-import SideControl from '@/components/SideControl.tsx';
-import { Outlet, useLocation, useParams } from 'react-router-dom';
-import type { DayOfWeek } from '@api/schedulesSchema.ts';
 
 const getAdjustedDayOfWeek = (timezone: string | null): DayOfWeek => {
   // Get the current moment in the server's configured timezone

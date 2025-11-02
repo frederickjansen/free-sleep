@@ -84,7 +84,6 @@ export const getFieldFromIndexedDB = async <T extends keyof UserSettings>(
       return null;
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(`Error retrieving field '${field}' from IndexedDB:`, error);
     return null;
   }

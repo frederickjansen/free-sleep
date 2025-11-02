@@ -1,7 +1,7 @@
-import ThermostatIcon from '@mui/icons-material/Thermostat';
-import { Box, Paper, Typography } from '@mui/material';
 import type { DeviceStatus } from '@api/deviceStatusSchema';
 import type { Settings } from '@api/settingsSchema';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
+import { Box, Paper, Typography } from '@mui/material';
 import moment from 'moment';
 
 interface RoomClimateProps {
@@ -15,7 +15,7 @@ export default function RoomClimate({
 }: RoomClimateProps) {
   const { roomClimate } = deviceStatus;
 
-  if (!roomClimate || roomClimate.temperatureC === undefined) {
+  if (roomClimate?.temperatureC === undefined) {
     return null;
   }
 

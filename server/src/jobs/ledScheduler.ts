@@ -1,8 +1,8 @@
 import moment from 'moment-timezone';
 import schedule from 'node-schedule';
-import { updateDeviceStatus } from '../routes/deviceStatus/updateDeviceStatus.js';
 import type { Settings } from '../db/settingsSchema.js';
 import logger from '../logger.js';
+import { updateDeviceStatus } from '../routes/deviceStatus/updateDeviceStatus.js';
 
 function parseTimeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
@@ -30,7 +30,9 @@ export const scheduleLedNightMode = (settingsData: Settings) => {
   const { timeZone, ledNightMode } = settingsData;
 
   if (timeZone === null || !ledNightMode) {
-    logger.debug('LED night mode: timezone not set or ledNightMode not configured');
+    logger.debug(
+      'LED night mode: timezone not set or ledNightMode not configured',
+    );
     return;
   }
 

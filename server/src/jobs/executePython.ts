@@ -24,24 +24,28 @@ export const executePythonScript = ({
     const command = `${pythonExecutable} -B ${script} ${args.join(' ')}`;
     logger.info(`Executing: ${command}`);
 
-    exec(command, {
-      env: { ...process.env },
-      cwd: '/home/dac/free-sleep/biometrics'
-    }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`Execution error: ${error.message}`);
-        reject(error);
-        return;
-      }
-      // Python libraries often write logs to stderr even on success.
-      // Treat non-empty stderr as a warning, not a failure, unless exit code != 0 above.
-      if (stderr && stderr.trim().length > 0) {
-        logger.warn(`Python stderr: ${stderr}`);
-      }
-      if (stdout) {
-        logger.info(`Python stdout: ${stdout}`);
-      }
-      resolve();
-    });
+    exec(
+      command,
+      {
+        env: { ...process.env },
+        cwd: '/home/dac/free-sleep/biometrics',
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          logger.error(`Execution error: ${error.message}`);
+          reject(error);
+          return;
+        }
+        // Python libraries often write logs to stderr even on success.
+        // Treat non-empty stderr as a warning, not a failure, unless exit code != 0 above.
+        if (stderr && stderr.trim().length > 0) {
+          logger.warn(`Python stderr: ${stderr}`);
+        }
+        if (stdout) {
+          logger.info(`Python stdout: ${stdout}`);
+        }
+        resolve();
+      },
+    );
   });
 };

@@ -2,7 +2,10 @@ import cbor from 'cbor';
 import fs from 'fs';
 import memoryDB from '../db/memoryDB.js';
 import settingsDB from '../db/settings.js';
-import { storeWaterLevelReading, getRecentWaterLevelReadings } from '../db/waterLevelReadings.js';
+import {
+  getRecentWaterLevelReadings,
+  storeWaterLevelReading,
+} from '../db/waterLevelReadings.js';
 import logger from '../logger.js';
 import { BASE_PRESETS } from './basePresets.js';
 import { executeFunction } from './deviceApi.js';
@@ -55,7 +58,11 @@ export class FrankenMonitor {
   // Track last processed capwater log signature to avoid duplicate inserts
   private lastCapwaterSignature: string | null = null;
   // Store latest room climate data
-  private roomClimateData: { temperatureC: number; humidity: number; timestamp: number } | null = null;
+  private roomClimateData: {
+    temperatureC: number;
+    humidity: number;
+    timestamp: number;
+  } | null = null;
 
   public async start() {
     if (this.isRunning) {
@@ -402,24 +409,36 @@ export class FrankenMonitor {
       };
       await memoryDB.write();
 
-      logger.info(`[processPrimingState] Priming completed successfully (needsPrime: ${needsPrime})`);
+      logger.info(
+        `[processPrimingState] Priming completed successfully (needsPrime: ${needsPrime})`,
+      );
     } else if (isCurrentlyPriming && !this.wasPriming) {
       this.wasPriming = true;
-      logger.info(`[processPrimingState] Priming started (priming: ${isPriming}, needsPrime: ${needsPrime})`);
+      logger.info(
+        `[processPrimingState] Priming started (priming: ${isPriming}, needsPrime: ${needsPrime})`,
+      );
     }
 
     // Log priming status changes for debugging
     if (needsPrime > 0) {
-      logger.debug(`[processPrimingState] Pod 4 needsPrime level: ${needsPrime}`);
+      logger.debug(
+        `[processPrimingState] Pod 4 needsPrime level: ${needsPrime}`,
+      );
     }
   }
 
   /**
    * Parse a capwater log line and extract sensor data
    */
-  private parseCapwaterLogLine(logLine: string): { rawLevel: number; calibratedEmpty: number; calibratedFull: number; timestamp: number } | null {
+  private parseCapwaterLogLine(logLine: string): {
+    rawLevel: number;
+    calibratedEmpty: number;
+    calibratedFull: number;
+    timestamp: number;
+  } | null {
     // Parse the log line: [frozen] -> FW: [capwater] Raw: 1.140402, Capwater calibrated. Empty: 0.84, Full: 1.13
-    const regex = /\[capwater\] Raw:\s*([0-9.]+).*Empty:\s*([0-9.]+).*Full:\s*([0-9.]+)/;
+    const regex =
+      /\[capwater\] Raw:\s*([0-9.]+).*Empty:\s*([0-9.]+).*Full:\s*([0-9.]+)/;
     const match = logLine.match(regex);
 
     if (!match) {
@@ -457,7 +476,7 @@ export class FrankenMonitor {
   private parseRoomClimateLine(logLine: string): {
     temperatureC: number;
     humidity: number;
-    timestamp: number
+    timestamp: number;
   } | null {
     // Parse: [ambient] temp 24.8352 humidity 41.2076 percent
     const regex = /\[ambient\] temp ([0-9.]+) humidity ([0-9.]+) percent/;
@@ -499,19 +518,29 @@ export class FrankenMonitor {
 
       if (existingReadings.length > 0) {
         // Check the time span of existing data
-        const oldestTimestamp = Math.min(...existingReadings.map(r => r.timestamp));
-        const newestTimestamp = Math.max(...existingReadings.map(r => r.timestamp));
+        const oldestTimestamp = Math.min(
+          ...existingReadings.map((r) => r.timestamp),
+        );
+        const newestTimestamp = Math.max(
+          ...existingReadings.map((r) => r.timestamp),
+        );
         const dataSpanHours = (newestTimestamp - oldestTimestamp) / 3600;
         const dataSpanDays = dataSpanHours / 24;
 
         if (dataSpanDays >= 5) {
-          logger.info(`Found ${existingReadings.length} existing water readings spanning ${dataSpanDays.toFixed(1)} days, skipping backfill`);
+          logger.info(
+            `Found ${existingReadings.length} existing water readings spanning ${dataSpanDays.toFixed(1)} days, skipping backfill`,
+          );
           return;
         } else {
-          logger.info(`Found ${existingReadings.length} existing water readings spanning only ${dataSpanDays.toFixed(1)} days (< 5 days), proceeding with backfill`);
+          logger.info(
+            `Found ${existingReadings.length} existing water readings spanning only ${dataSpanDays.toFixed(1)} days (< 5 days), proceeding with backfill`,
+          );
         }
       } else {
-        logger.info('No existing water readings found, backfilling from system logs...');
+        logger.info(
+          'No existing water readings found, backfilling from system logs...',
+        );
       }
 
       const { exec } = await import('child_process');
@@ -521,7 +550,7 @@ export class FrankenMonitor {
       // Get all capwater readings from the last 30 days of logs (only frank process, not bun)
       // Only match lines that include the canonical capwater data pattern
       const { stdout } = await execAsync(
-        'journalctl --no-pager --since "30 days ago" | grep "frank\\[" | grep -E "\\[capwater\\] Raw:"'
+        'journalctl --no-pager --since "30 days ago" | grep "frank\\[" | grep -E "\\[capwater\\] Raw:"',
       );
 
       if (!stdout.trim()) {
@@ -548,9 +577,13 @@ export class FrankenMonitor {
         backfilledCount++;
       }
 
-      logger.info(`Backfilled ${backfilledCount} historical capwater readings from system logs`);
+      logger.info(
+        `Backfilled ${backfilledCount} historical capwater readings from system logs`,
+      );
     } catch (error) {
-      logger.error(`Failed to backfill historical water readings: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Failed to backfill historical water readings: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -564,7 +597,7 @@ export class FrankenMonitor {
       // Get the latest capwater reading from system logs (from frank process, not bun)
       // Only match lines that include the canonical capwater data pattern
       const { stdout } = await execAsync(
-        'journalctl --no-pager --lines=1000 | grep "frank\\[" | grep -E "\\[capwater\\] Raw:" | tail -1'
+        'journalctl --no-pager --lines=1000 | grep "frank\\[" | grep -E "\\[capwater\\] Raw:" | tail -1',
       );
 
       if (!stdout.trim()) {
@@ -576,11 +609,15 @@ export class FrankenMonitor {
       if (!parsed) {
         // Log the offending line (truncated) to aid debugging but keep noise low
         const sample = line.length > 200 ? `${line.slice(0, 200)}…` : line;
-        logger.debug(`Could not parse capwater reading from log line: ${sample}`);
+        logger.debug(
+          `Could not parse capwater reading from log line: ${sample}`,
+        );
         return;
       }
 
-      const isPriming = this.variableValues.priming === 'true' || this.variableValues.needsPrime !== '0';
+      const isPriming =
+        this.variableValues.priming === 'true' ||
+        this.variableValues.needsPrime !== '0';
 
       // Build a signature from the parsed values and the source timestamp
       const signature = `${parsed.timestamp}|${parsed.rawLevel}|${parsed.calibratedEmpty}|${parsed.calibratedFull}`;
@@ -599,9 +636,10 @@ export class FrankenMonitor {
       });
 
       this.lastCapwaterSignature = signature;
-
     } catch (error) {
-      logger.debug(`Failed to process capwater data: ${error instanceof Error ? error.message : String(error)}`);
+      logger.debug(
+        `Failed to process capwater data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -616,7 +654,7 @@ export class FrankenMonitor {
 
       // Get latest ambient reading from frank logs
       const { stdout } = await execAsync(
-        'journalctl --no-pager --lines=100 | grep "frank\\[" | grep "\\[ambient\\]" | tail -1'
+        'journalctl --no-pager --lines=100 | grep "frank\\[" | grep "\\[ambient\\]" | tail -1',
       );
 
       if (!stdout.trim()) {
@@ -630,7 +668,9 @@ export class FrankenMonitor {
         this.roomClimateData = parsed;
       }
     } catch (error) {
-      logger.debug(`Failed to process room climate data: ${error instanceof Error ? error.message : String(error)}`);
+      logger.debug(
+        `Failed to process room climate data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

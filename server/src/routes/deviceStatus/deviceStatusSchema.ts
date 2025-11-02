@@ -11,8 +11,12 @@ const SideStatusSchema = z
     currentTemperatureF: z.number(),
     targetTemperatureF: z
       .number()
-      .min(MIN_TEMPERATURE_F, { message: `Temperature must be at least ${MIN_TEMPERATURE_F}°F` })
-      .max(MAX_TEMPERATURE_F, { message: `Temperature cannot exceed ${MAX_TEMPERATURE_F}°F` }),
+      .min(MIN_TEMPERATURE_F, {
+        message: `Temperature must be at least ${MIN_TEMPERATURE_F}°F`,
+      })
+      .max(MAX_TEMPERATURE_F, {
+        message: `Temperature cannot exceed ${MAX_TEMPERATURE_F}°F`,
+      }),
     secondsRemaining: z.number(),
     isOn: z.boolean(),
     isAlarmVibrating: z.boolean(),
@@ -25,20 +29,26 @@ export const DeviceStatusSchema = z
     right: SideStatusSchema,
     waterLevel: z.string(),
     isPriming: z.boolean(),
-    waterLevelRaw: z.object({
-      raw: z.number().optional(),
-      calibratedEmpty: z.number().optional(),
-      calibratedFull: z.number().optional(),
-      timestamp: z.number().optional(),
-    }).optional(),
-    roomClimate: z.object({
-      temperatureC: z.number().optional(),
-      humidity: z.number().optional(),
-      timestamp: z.number().optional(),
-    }).optional(),
-    primeCompletedNotification: z.object({
-      timestamp: z.string().datetime(),
-    }).optional(),
+    waterLevelRaw: z
+      .object({
+        raw: z.number().optional(),
+        calibratedEmpty: z.number().optional(),
+        calibratedFull: z.number().optional(),
+        timestamp: z.number().optional(),
+      })
+      .optional(),
+    roomClimate: z
+      .object({
+        temperatureC: z.number().optional(),
+        humidity: z.number().optional(),
+        timestamp: z.number().optional(),
+      })
+      .optional(),
+    primeCompletedNotification: z
+      .object({
+        timestamp: z.string().datetime(),
+      })
+      .optional(),
     settings: z.object({
       v: z.number(),
       gainLeft: z.number(),
@@ -52,17 +62,23 @@ export type SideStatus = z.infer<typeof SideStatusSchema>;
 export type DeviceStatus = z.infer<typeof DeviceStatusSchema>;
 
 // For update payloads, accept deep partials explicitly while preserving validation
-const SideStatusUpdateSchema = z.object({
-  currentTemperatureF: z.number().optional(),
-  targetTemperatureF: z
-    .number()
-    .min(MIN_TEMPERATURE_F, { message: `Temperature must be at least ${MIN_TEMPERATURE_F}°F` })
-    .max(MAX_TEMPERATURE_F, { message: `Temperature cannot exceed ${MAX_TEMPERATURE_F}°F` })
-    .optional(),
-  secondsRemaining: z.number().optional(),
-  isOn: z.boolean().optional(),
-  isAlarmVibrating: z.boolean().optional(),
-}).strict();
+const SideStatusUpdateSchema = z
+  .object({
+    currentTemperatureF: z.number().optional(),
+    targetTemperatureF: z
+      .number()
+      .min(MIN_TEMPERATURE_F, {
+        message: `Temperature must be at least ${MIN_TEMPERATURE_F}°F`,
+      })
+      .max(MAX_TEMPERATURE_F, {
+        message: `Temperature cannot exceed ${MAX_TEMPERATURE_F}°F`,
+      })
+      .optional(),
+    secondsRemaining: z.number().optional(),
+    isOn: z.boolean().optional(),
+    isAlarmVibrating: z.boolean().optional(),
+  })
+  .strict();
 
 export const DeviceStatusUpdateSchema = z
   .object({
@@ -70,20 +86,26 @@ export const DeviceStatusUpdateSchema = z
     right: SideStatusUpdateSchema.optional(),
     waterLevel: z.string().optional(),
     isPriming: z.boolean().optional(),
-    waterLevelRaw: z.object({
-      raw: z.number().optional(),
-      calibratedEmpty: z.number().optional(),
-      calibratedFull: z.number().optional(),
-      timestamp: z.number().optional(),
-    }).optional(),
-    roomClimate: z.object({
-      temperatureC: z.number().optional(),
-      humidity: z.number().optional(),
-      timestamp: z.number().optional(),
-    }).optional(),
-    primeCompletedNotification: z.object({
-      timestamp: z.string().datetime(),
-    }).optional(),
+    waterLevelRaw: z
+      .object({
+        raw: z.number().optional(),
+        calibratedEmpty: z.number().optional(),
+        calibratedFull: z.number().optional(),
+        timestamp: z.number().optional(),
+      })
+      .optional(),
+    roomClimate: z
+      .object({
+        temperatureC: z.number().optional(),
+        humidity: z.number().optional(),
+        timestamp: z.number().optional(),
+      })
+      .optional(),
+    primeCompletedNotification: z
+      .object({
+        timestamp: z.string().datetime(),
+      })
+      .optional(),
     settings: z
       .object({
         v: z.number().optional(),

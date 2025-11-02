@@ -1,4 +1,7 @@
-import type { Prisma, ambient_light_readings as AmbientLightReading } from '@prisma/client';
+import type {
+  ambient_light_readings as AmbientLightReading,
+  Prisma,
+} from '@prisma/client';
 import express, { type Request, type Response } from 'express';
 import moment from 'moment-timezone';
 import prisma from '../../db/prisma.js';
@@ -14,7 +17,10 @@ interface AmbientLightQuery {
 
 router.get(
   '/ambient-light',
-  async (req: Request<object, object, object, AmbientLightQuery>, res: Response) => {
+  async (
+    req: Request<object, object, object, AmbientLightQuery>,
+    res: Response,
+  ) => {
     try {
       const { startTime, endTime, limit } = req.query;
 
@@ -24,11 +30,12 @@ router.get(
       if (startTime) query.timestamp.gte = moment(startTime).unix();
       if (endTime) query.timestamp.lte = moment(endTime).unix();
 
-      const readings: AmbientLightReading[] = await prisma.ambient_light_readings.findMany({
-        where: query,
-        orderBy: { timestamp: 'asc' },
-        take: limit ? parseInt(limit, 10) : undefined,
-      });
+      const readings: AmbientLightReading[] =
+        await prisma.ambient_light_readings.findMany({
+          where: query,
+          orderBy: { timestamp: 'asc' },
+          take: limit ? parseInt(limit, 10) : undefined,
+        });
 
       // Format the response to include ISO timestamps
       const formattedReadings = readings.map((reading) => ({
@@ -46,7 +53,10 @@ router.get(
 
 router.get(
   '/ambient-light/summary',
-  async (req: Request<object, object, object, AmbientLightQuery>, res: Response) => {
+  async (
+    req: Request<object, object, object, AmbientLightQuery>,
+    res: Response,
+  ) => {
     try {
       const { startTime, endTime } = req.query;
 
@@ -82,30 +92,27 @@ router.get(
   },
 );
 
-router.get(
-  '/ambient-light/latest',
-  async (_req: Request, res: Response) => {
-    try {
-      const latestReading = await prisma.ambient_light_readings.findFirst({
-        orderBy: { timestamp: 'desc' },
-      });
+router.get('/ambient-light/latest', async (_req: Request, res: Response) => {
+  try {
+    const latestReading = await prisma.ambient_light_readings.findFirst({
+      orderBy: { timestamp: 'desc' },
+    });
 
-      if (!latestReading) {
-        res.status(404).json({ error: 'No ambient light readings found' });
-        return;
-      }
-
-      const formattedReading = {
-        ...latestReading,
-        datetime: moment.unix(latestReading.timestamp).toISOString(),
-      };
-
-      res.json(formattedReading);
-    } catch (error) {
-      console.error('Error fetching latest ambient light reading:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    if (!latestReading) {
+      res.status(404).json({ error: 'No ambient light readings found' });
+      return;
     }
-  },
-);
+
+    const formattedReading = {
+      ...latestReading,
+      datetime: moment.unix(latestReading.timestamp).toISOString(),
+    };
+
+    res.json(formattedReading);
+  } catch (error) {
+    console.error('Error fetching latest ambient light reading:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 export default router;

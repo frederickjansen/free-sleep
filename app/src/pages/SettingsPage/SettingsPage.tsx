@@ -1,6 +1,9 @@
 import { useBaseStatus } from '@api/baseControl';
 import { postSettings, useSettings } from '@api/settings.ts';
 import type { Settings } from '@api/settingsSchema.ts';
+import Box from '@mui/material/Box';
+import { useAppStore } from '@state/appStore.tsx';
+import type { DeepPartial } from 'ts-essentials';
 import AlarmButtonBehavior from '@/pages/SettingsPage/AlarmButtonBehavior.tsx';
 import DailyPriming from '@/pages/SettingsPage/DailyPriming.tsx';
 import DailyReboot from '@/pages/SettingsPage/DailyReboot.tsx';
@@ -15,9 +18,6 @@ import SideSettings from '@/pages/SettingsPage/SideSettings.tsx';
 import TemperatureFormatSelector from '@/pages/SettingsPage/TemperatureFormatSelector.tsx';
 import TimeZoneSelector from '@/pages/SettingsPage/TimeZoneSelector.tsx';
 import VersionInfo from '@/pages/SettingsPage/VersionInfo.tsx';
-import Box from '@mui/material/Box';
-import { useAppStore } from '@state/appStore.tsx';
-import type { DeepPartial } from 'ts-essentials';
 import PageContainer from '@/pages/shared/PageContainer.tsx';
 import SectionCard from '@/pages/shared/SectionCard.tsx';
 

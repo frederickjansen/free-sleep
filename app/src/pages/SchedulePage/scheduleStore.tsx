@@ -302,11 +302,7 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
     const { originalSchedules } = get();
     const { side } = useAppStore.getState();
 
-    if (
-      !originalSchedules ||
-      !originalSchedules[side].schedules ||
-      !originalSchedules[side].schedules![scheduleId]
-    ) {
+    if (!originalSchedules?.[side].schedules?.[scheduleId]) {
       return;
     }
 

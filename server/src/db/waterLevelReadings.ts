@@ -32,7 +32,9 @@ export interface LeakAlert {
 /**
  * Store a water level reading in the database
  */
-export async function storeWaterLevelReading(reading: WaterLevelReading): Promise<void> {
+export async function storeWaterLevelReading(
+  reading: WaterLevelReading,
+): Promise<void> {
   try {
     await prisma.water_level_readings.create({
       data: {
@@ -43,17 +45,20 @@ export async function storeWaterLevelReading(reading: WaterLevelReading): Promis
         is_priming: reading.isPriming ?? false,
       },
     });
-
   } catch (error) {
-    logger.error(`Failed to store water level reading: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to store water level reading: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
 /**
  * Get recent water level readings (last N hours)
  */
-export async function getRecentWaterLevelReadings(hoursBack: number = 24): Promise<WaterLevelReading[]> {
-  const cutoffTime = Math.floor(Date.now() / 1000) - (hoursBack * 3600);
+export async function getRecentWaterLevelReadings(
+  hoursBack = 24,
+): Promise<WaterLevelReading[]> {
+  const cutoffTime = Math.floor(Date.now() / 1000) - hoursBack * 3600;
 
   try {
     const readings = await prisma.water_level_readings.findMany({
@@ -67,7 +72,7 @@ export async function getRecentWaterLevelReadings(hoursBack: number = 24): Promi
       },
     });
 
-    return readings.map(reading => ({
+    return readings.map((reading) => ({
       timestamp: reading.timestamp,
       rawLevel: reading.raw_level,
       calibratedEmpty: reading.calibrated_empty,
@@ -75,7 +80,9 @@ export async function getRecentWaterLevelReadings(hoursBack: number = 24): Promi
       isPriming: reading.is_priming,
     }));
   } catch (error) {
-    logger.error(`Failed to get recent water level readings: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to get recent water level readings: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return [];
   }
 }
@@ -97,9 +104,13 @@ export async function storeLeakAlert(alert: LeakAlert): Promise<void> {
       },
     });
 
-    logger.warn(`Leak alert stored: ${alert.alertType} (${alert.severity}) - Rate: ${alert.rateOfChange}/hour`);
+    logger.warn(
+      `Leak alert stored: ${alert.alertType} (${alert.severity}) - Rate: ${alert.rateOfChange}/hour`,
+    );
   } catch (error) {
-    logger.error(`Failed to store leak alert: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to store leak alert: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -117,9 +128,12 @@ export async function getActiveLeakAlerts(): Promise<LeakAlert[]> {
       },
     });
 
-    return alerts.map(alert => ({
+    return alerts.map((alert) => ({
       timestamp: alert.timestamp,
-      alertType: alert.alert_type as 'slow_leak' | 'fast_leak' | 'sensor_anomaly',
+      alertType: alert.alert_type as
+        | 'slow_leak'
+        | 'fast_leak'
+        | 'sensor_anomaly',
       severity: alert.severity as 'low' | 'medium' | 'high' | 'critical',
       rawLevelStart: alert.raw_level_start,
       rawLevelEnd: alert.raw_level_end,
@@ -127,7 +141,9 @@ export async function getActiveLeakAlerts(): Promise<LeakAlert[]> {
       rateOfChange: alert.rate_of_change,
     }));
   } catch (error) {
-    logger.error(`Failed to get active leak alerts: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to get active leak alerts: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return [];
   }
 }
@@ -149,7 +165,9 @@ export async function dismissLeakAlert(timestamp: number): Promise<void> {
 
     logger.info(`Dismissed leak alert with timestamp ${timestamp}`);
   } catch (error) {
-    logger.error(`Failed to dismiss leak alert: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to dismiss leak alert: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -157,7 +175,7 @@ export async function dismissLeakAlert(timestamp: number): Promise<void> {
  * Clean up old water level readings (keep last 30 days)
  */
 export async function cleanupOldReadings(): Promise<void> {
-  const cutoffTime = Math.floor(Date.now() / 1000) - (30 * 24 * 3600); // 30 days ago
+  const cutoffTime = Math.floor(Date.now() / 1000) - 30 * 24 * 3600; // 30 days ago
 
   try {
     const result = await prisma.water_level_readings.deleteMany({
@@ -172,6 +190,8 @@ export async function cleanupOldReadings(): Promise<void> {
       logger.info(`Cleaned up ${result.count} old water level readings`);
     }
   } catch (error) {
-    logger.error(`Failed to cleanup old readings: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Failed to cleanup old readings: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }

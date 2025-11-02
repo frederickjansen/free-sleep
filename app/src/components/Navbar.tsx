@@ -9,8 +9,8 @@ import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useAppStore } from '@state/appStore.tsx';
-import { useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PAGES } from './pages';
 
 export default function Navbar() {

@@ -1,8 +1,8 @@
-import { Box, Button, Typography, Alert } from '@mui/material';
-import { useState } from 'react';
-import { useAppStore } from '@state/appStore.tsx';
 import { postSchedules } from '@api/schedules.ts';
 import type { Side } from '@api/schedulesSchema.ts';
+import { Alert, Box, Button, Typography } from '@mui/material';
+import { useAppStore } from '@state/appStore.tsx';
+import { useState } from 'react';
 
 interface ScheduleModeSelectorProps {
   currentMode: 'day-specific' | 'basic';

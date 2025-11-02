@@ -1,7 +1,7 @@
-import schedule from 'node-schedule';
 import moment from 'moment-timezone';
-import type { Settings } from '../db/settingsSchema.js';
+import schedule from 'node-schedule';
 import settingsDB from '../db/settings.js';
+import type { Settings } from '../db/settingsSchema.js';
 import logger from '../logger.js';
 import { updateDeviceStatus } from '../routes/deviceStatus/updateDeviceStatus.js';
 
@@ -19,7 +19,9 @@ function scheduleResume(side: 'left' | 'right', whenIso: string) {
   const jobName = `away-resume-${side}`;
   cancelJob(jobName);
 
-  logger.info(`[awayScheduler] Scheduling away resume for ${side} at ${when.toISOString()}`);
+  logger.info(
+    `[awayScheduler] Scheduling away resume for ${side} at ${when.toISOString()}`,
+  );
   schedule.scheduleJob(jobName, when.toDate(), async () => {
     try {
       await settingsDB.read();
@@ -28,7 +30,9 @@ function scheduleResume(side: 'left' | 'right', whenIso: string) {
       await settingsDB.write();
       logger.info(`[awayScheduler] ${side} side resumed from away mode`);
     } catch (error) {
-      logger.error(`[awayScheduler] Failed to resume ${side}: ${String(error)}`);
+      logger.error(
+        `[awayScheduler] Failed to resume ${side}: ${String(error)}`,
+      );
     }
   });
 }
@@ -42,7 +46,9 @@ function scheduleStart(side: 'left' | 'right', whenIso: string) {
   const jobName = `away-start-${side}`;
   cancelJob(jobName);
 
-  logger.info(`[awayScheduler] Scheduling away start for ${side} at ${when.toISOString()}`);
+  logger.info(
+    `[awayScheduler] Scheduling away start for ${side} at ${when.toISOString()}`,
+  );
   schedule.scheduleJob(jobName, when.toDate(), async () => {
     try {
       await settingsDB.read();
@@ -53,7 +59,9 @@ function scheduleStart(side: 'left' | 'right', whenIso: string) {
       await updateDeviceStatus({ [side]: { isOn: false } });
       logger.info(`[awayScheduler] ${side} side entered away mode`);
     } catch (error) {
-      logger.error(`[awayScheduler] Failed to start away for ${side}: ${String(error)}`);
+      logger.error(
+        `[awayScheduler] Failed to start away for ${side}: ${String(error)}`,
+      );
     }
   });
 }
@@ -71,19 +79,25 @@ export function scheduleAway(settings: Settings) {
         if (start.isBefore(now)) {
           // If past and not already away, enable immediately
           if (!sideSettings.awayMode) {
-            logger.info(`[awayScheduler] awayStart in past for ${side}; enabling away now`);
+            logger.info(
+              `[awayScheduler] awayStart in past for ${side}; enabling away now`,
+            );
             settingsDB.data[side].awayMode = true;
             settingsDB.data[side].awayStart = null;
             settingsDB.write();
             updateDeviceStatus({ [side]: { isOn: false } }).catch((e) =>
-              logger.warn(`[awayScheduler] Failed to power off ${side} on immediate start: ${String(e)}`),
+              logger.warn(
+                `[awayScheduler] Failed to power off ${side} on immediate start: ${String(e)}`,
+              ),
             );
           }
         } else if (!sideSettings.awayMode) {
           scheduleStart(side, startIso);
         }
       } else {
-        logger.warn(`[awayScheduler] Invalid awayStart value for ${side}: ${startIso}`);
+        logger.warn(
+          `[awayScheduler] Invalid awayStart value for ${side}: ${startIso}`,
+        );
       }
     } else {
       // No start provided: if awayMode is true, that means start immediately by user action
@@ -99,7 +113,9 @@ export function scheduleAway(settings: Settings) {
         if (ret.isBefore(now)) {
           // In past: clear immediately if currently away
           if (sideSettings.awayMode) {
-            logger.info(`[awayScheduler] awayReturn in past for ${side}; resuming now`);
+            logger.info(
+              `[awayScheduler] awayReturn in past for ${side}; resuming now`,
+            );
             settingsDB.data[side].awayMode = false;
             settingsDB.data[side].awayReturn = null;
             settingsDB.write();
@@ -108,7 +124,9 @@ export function scheduleAway(settings: Settings) {
           scheduleResume(side, returnIso);
         }
       } else {
-        logger.warn(`[awayScheduler] Invalid awayReturn value for ${side}: ${returnIso}`);
+        logger.warn(
+          `[awayScheduler] Invalid awayReturn value for ${side}: ${returnIso}`,
+        );
       }
     }
   });

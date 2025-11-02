@@ -231,11 +231,15 @@ export class TriMixBaseControl {
       this.initializationAttempts++;
 
       if (this.initializationAttempts <= this.maxInitializationAttempts) {
-        logger.warn(`Failed to load base configuration. Attempt ${this.initializationAttempts}/${this.maxInitializationAttempts}. Retrying in 30s...`);
+        logger.warn(
+          `Failed to load base configuration. Attempt ${this.initializationAttempts}/${this.maxInitializationAttempts}. Retrying in 30s...`,
+        );
         setTimeout(() => this.initialize(), 30000);
         return;
       } else {
-        logger.info('Base configuration file not found after maximum attempts. Base control will be disabled.');
+        logger.info(
+          'Base configuration file not found after maximum attempts. Base control will be disabled.',
+        );
         this._isConfigured = false;
         this.updateMemoryDBStatus();
         return;

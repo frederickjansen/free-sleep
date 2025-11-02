@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 import logger from './logger.js';
 
 function checkIfDacSockPathConfigured(): string | undefined {
@@ -56,7 +56,7 @@ class Config {
     this.dacSockPath = this.detectSockPath();
     this.dbFolder = process.env.DATA_FOLDER;
     this.lowDbFolder = `${this.dbFolder}lowdb/`;
-    
+
     // Ensure required directories exist
     this.ensureDirectoriesExist();
   }

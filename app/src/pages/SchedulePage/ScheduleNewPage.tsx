@@ -1,12 +1,12 @@
 import { useSchedules } from '@api/schedules';
-import ScheduleEditView from '@/pages/SchedulePage/ScheduleEditView.tsx';
-import BasicScheduleEdit from '@/pages/SchedulePage/BasicScheduleEdit.tsx';
-import { useScheduleStore } from '@/pages/SchedulePage/scheduleStore.tsx';
 import { useAppStore } from '@state/appStore.tsx';
 import { useEffect } from 'react';
-import PageContainer from '@/pages/shared/PageContainer.tsx';
-import SideControl from '@/components/SideControl.tsx';
 import { useNavigate } from 'react-router-dom';
+import SideControl from '@/components/SideControl.tsx';
+import BasicScheduleEdit from '@/pages/SchedulePage/BasicScheduleEdit.tsx';
+import ScheduleEditView from '@/pages/SchedulePage/ScheduleEditView.tsx';
+import { useScheduleStore } from '@/pages/SchedulePage/scheduleStore.tsx';
+import PageContainer from '@/pages/shared/PageContainer.tsx';
 
 export default function ScheduleNewPage() {
   const navigate = useNavigate();

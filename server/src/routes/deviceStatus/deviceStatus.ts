@@ -2,9 +2,9 @@ import express, { type Request, type Response } from 'express';
 import type { DeepPartial } from 'ts-essentials';
 import { z } from 'zod';
 import { getFranken } from '../../8sleep/frankenServer.js';
-import { getFrankenMonitor } from '../../server.js';
 import memoryDB from '../../db/memoryDB.js';
 import logger from '../../logger.js';
+import { getFrankenMonitor } from '../../server.js';
 import {
   type DeviceStatus,
   DeviceStatusUpdateSchema,
@@ -41,9 +41,11 @@ router.post('/deviceStatus', async (req: Request, res: Response) => {
   }
 });
 
-const SnoozeAlarmSchema = z.object({
-  side: z.enum(['left', 'right']),
-}).strict();
+const SnoozeAlarmSchema = z
+  .object({
+    side: z.enum(['left', 'right']),
+  })
+  .strict();
 
 router.post('/deviceStatus/snooze', async (req: Request, res: Response) => {
   const { body } = req;
@@ -77,17 +79,20 @@ router.post('/deviceStatus/snooze', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/deviceStatus/dismissPrimeNotification', async (req: Request, res: Response) => {
-  try {
-    await memoryDB.read();
-    memoryDB.data.primeCompletedNotification = undefined;
-    await memoryDB.write();
-    logger.info('Prime completion notification dismissed');
-    res.status(204).end();
-  } catch (error) {
-    logger.error('Error dismissing prime notification:', error);
-    res.status(500).json({ error });
-  }
-});
+router.post(
+  '/deviceStatus/dismissPrimeNotification',
+  async (req: Request, res: Response) => {
+    try {
+      await memoryDB.read();
+      memoryDB.data.primeCompletedNotification = undefined;
+      await memoryDB.write();
+      logger.info('Prime completion notification dismissed');
+      res.status(204).end();
+    } catch (error) {
+      logger.error('Error dismissing prime notification:', error);
+      res.status(500).json({ error });
+    }
+  },
+);
 
 export default router;
